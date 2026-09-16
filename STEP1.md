@@ -2,7 +2,7 @@
 
 English below. ภาษาไทยอยู่ด้านล่าง
 
-This folder is a compilable Unity 2022 LTS / Unity 6 (2D URP) scaffold. It does **not** include World map, networking, servers, gacha, TurnManager, or a real Battle UI.
+This folder is a compilable Unity 2022 LTS / Unity 6 (2D URP) scaffold. Step 2 adds an offline 3v3 Battle test — see **[STEP2.md](STEP2.md)**. World map, networking, servers, and gacha are still out of scope.
 
 ---
 
@@ -12,7 +12,7 @@ This folder is a compilable Unity 2022 LTS / Unity 6 (2D URP) scaffold. It does 
 2. **Add** / **Open** this repository root (the folder that contains `Assets/` and `Packages/`).
 3. Wait for the first script compile. Ignore empty reserved folders (`Scripts/Map`, `Scripts/UI`, `Scripts/AI`).
 4. If Unity asks to upgrade packages (Unity 6 opening a 2022.3 manifest), accept the upgrade.
-5. Optional 2D URP pipeline: **Assets → Create → Rendering → URP Asset (with 2D Renderer)** then **Edit → Project Settings → Graphics → Scriptable Render Pipeline Settings**.
+5. Optional 2D URP pipeline: follow **`Assets/Settings/README_URP.md`** (create a 2D URP asset, assign it in Project Settings → Graphics / Quality). Script-only tests work on Built-in. First open may need **Tools → TS Online → Create Default Data Assets** to reassign element icons.
 
 ### If ScriptableObject fields look empty
 
@@ -59,6 +59,9 @@ Checks include:
    - Heal with Earth vs Water → E stays **1.00**, Final **80**
    - Normal attack Earth vs Water → Final **89.6** (`80 * 1.12`)
    - Same skill + crit → Final **150** (`80 * 1.25 * 1.5`)
+   - Mastery input **0.50** is clamped to **0.15** → Final **115** (`80 * 1.25 * 1.15`)
+   - Magic `INT=100`, `Power=1`, `DEF=40` → Base **90**; Water vs Fire → Final **112.5**
+   - Opposite learn cost (`Earth` vs `Fire`) → **-1** (cannot learn; never 1.5)
 
 Any `FAIL` line means a formula constant drifted. Do not “fix” the test — fix `ElementSystem` / `DamageCalculator`.
 
@@ -69,7 +72,7 @@ Any `FAIL` line means a formula constant drifted. Do not “fix” the test — 
 1. Open `Assets/Scenes/Battle.unity`.
 2. Hierarchy should already contain **DamageFormulaSmokeTest**.
 3. Press **Play**.
-4. Console should log the same PASS/FAIL report (`DamageFormulaSmokeTest` on Start).
+4. Console should log the same PASS/FAIL report (`DamageFormulaSmokeTest` on Start). The same scene now also runs the Step 2 3v3 test (`BattleBootstrap`) — see STEP2.md.
 
 To add it yourself: empty GameObject → **Add Component → Damage Formula Smoke Test**. Context menu on the component: **Run Element Formula Checks**. `OnValidate` can also log in Edit Mode if `runOnValidate` is enabled.
 
@@ -183,7 +186,7 @@ Adjacent pairs: Earth↔Water/Wind, Water↔Earth/Fire, Fire↔Water/Wind, Wind�
 ### Sample data
 
 - Elements: `Assets/Data/Elements/{Earth,Water,Fire,Wind}.asset`
-- Skills: physical+element (`GaleSlash`, `SkyPiercer`, …), magical (`FloodBolt`, `Rockslide`), heal (`SouthWindHeal`, `Mend` — E must stay 1), wall (`EarthenWall`)
+- Skills: physical+element (`GaleSlash`, `SkyPiercer`, …), magical (`FloodBolt`, `Rockslide`), heal (`SouthWindHeal`, `Mend` — E must stay 1), wall (`EarthenWall`). **`BasicStrike` is a None-element SKILL** (E=1.00). True normal attacks must use `DamageRequest.NormalAttack` (half-strength 1.12 / 0.90 / 1.00).
 - Generals: Zhao Yun / จูล่ง (Wind), Guan Yu / กวนอู (Wind), Lu Bu / ลิโป้ (Fire), Zhang Fei / เตียวหุย (Fire), Zhuge Liang / ขงเบ้ง (Water), Yang Xiu / หยางซิว (Earth)
 - Monsters: Forest Wolf (Wind), Mountain Bandit (Fire), Swamp Frog (Water), Small Stone Golem (Earth), Roof Bird (Wind), Lost Soldier (Fire)
 - Item stub: `Assets/Data/Items/Herb.asset`
@@ -192,7 +195,7 @@ Adjacent pairs: Earth↔Water/Wind, Water↔Earth/Fire, Fire↔Water/Wind, Wind�
 
 ### Scenes
 
-`Assets/Scenes/{Boot,CharacterCreate,World,Battle}.unity` — camera stubs. Battle includes the smoke-test object.
+`Assets/Scenes/{Boot,CharacterCreate,World,Battle}.unity` — Boot/World/Create are camera stubs. Battle includes the smoke-test object **and** the Step 2 3v3 bootstrap (see STEP2.md).
 
 Reserved empty folders: `Assets/Scripts/Map`, `UI`, `AI`; `Assets/Art/Placeholders`, `Art/UI`.
 

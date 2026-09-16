@@ -8,6 +8,9 @@ namespace TsOnline
         public string id;
         public string displayName;
         public string displayNameThai;
+        [TextArea(2, 5)]
+        [Tooltip("Designer notes. BasicStrike is a None-element SKILL — true normal attacks use DamageRequest.NormalAttack.")]
+        public string description;
         [Tooltip("Multiplier in ATK*Power or INT*Power. Not a hardcoded combat constant.")]
         public float power = 1f;
         public DamageKind damageKind = DamageKind.Physical;

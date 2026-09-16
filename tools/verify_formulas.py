@@ -95,6 +95,14 @@ def main() -> None:
     check("Resist 0.25", clamp_resist(0.25), 0.20)
     expect("Earth cannot learn Fire", can_learn("Earth", "Fire"), False)
     expect("Earth can learn Water", can_learn("Earth", "Water"), True)
+    check("Opposite learn cost sentinel", -1.0 if not can_learn("Earth", "Fire") else 1.5, -1.0)
+    check("Water vs Wind learn cost sentinel", -1.0 if not can_learn("Water", "Wind") else 1.5, -1.0)
+
+    def clamp_mastery(m: float) -> float:
+        return min(0.15, max(0.0, m))
+
+    check("M 0.50 clamped", clamp_mastery(0.50), 0.15)
+    check("M -0.1 clamped", clamp_mastery(-0.1), 0.0)
 
     base = 100 * 1.0 - 40 * 0.5
     check("Base", base, 80)
@@ -102,6 +110,11 @@ def main() -> None:
     check("Final NA", base * 1.12, 89.6)
     check("Final crit", base * 1.25 * 1.5, 150)
     check("Heal E", 1.0, 1.0)
+    check("Final clamped M 0.50", base * 1.25 * (1 + clamp_mastery(0.50)), 115)
+
+    magic_base = 100 * 1.0 - 40 * 0.25
+    check("Magic Base INT100 DEF40", magic_base, 90)
+    check("Magic Final Water vs Fire", magic_base * 1.25, 112.5)
 
     if failed:
         raise SystemExit(f"{failed} failed")

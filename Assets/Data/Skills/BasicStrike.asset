@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: BasicStrike
   m_EditorClassIdentifier: 
   id: basic_strike
-  displayName: Basic Strike
-  displayNameThai: โจมตีปกติ
+  displayName: Basic Strike (skill)
+  displayNameThai: สกิลไร้ธาตุ
+  description: None-element SKILL (E=1.00). True normal attacks must use DamageRequest.NormalAttack
+    so unit element applies half-strength E (1.12 / 0.90 / 1.00).
   power: 1.0
   damageKind: 0
   element: 0

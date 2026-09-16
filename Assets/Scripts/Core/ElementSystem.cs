@@ -21,6 +21,8 @@ namespace TsOnline
 
         public const float OwnElementLearnCost = 1.00f;
         public const float AdjacentLearnCost = 1.50f;
+        /// <summary>Returned by <see cref="GetLearnCostMultiplier"/> when the unit cannot learn the skill.</summary>
+        public const float CannotLearnCost = -1f;
 
         static readonly ElementType[] NoAdjacent = new ElementType[0];
 
@@ -121,6 +123,16 @@ namespace TsOnline
             return r;
         }
 
+        /// <summary>Mastery bonus M, cap 15%. Negatives clamp to 0.</summary>
+        public static float ClampMastery(float m)
+        {
+            if (m < 0f)
+                return 0f;
+            if (m > MasteryCap)
+                return MasteryCap;
+            return m;
+        }
+
         public static ElementType[] GetAdjacent(ElementType element)
         {
             switch (element)
@@ -168,16 +180,21 @@ namespace TsOnline
             return IsAdjacent(unitElement, skillElement);
         }
 
-        /// <summary>Own / none = ×1.0, adjacent = ×1.5. Opposite returns adjacent cost but <see cref="CanLearnSkill"/> is false.</summary>
+        /// <summary>
+        /// Own / none = ×1.0, adjacent = ×1.5.
+        /// If <see cref="CanLearnSkill"/> is false (opposite element), returns <see cref="CannotLearnCost"/> (-1), never 1.5.
+        /// </summary>
         public static float GetLearnCostMultiplier(ElementType unitElement, ElementType skillElement)
         {
+            if (!CanLearnSkill(unitElement, skillElement))
+                return CannotLearnCost;
             if (skillElement == ElementType.None || unitElement == ElementType.None)
                 return OwnElementLearnCost;
             if (unitElement == skillElement)
                 return OwnElementLearnCost;
             if (IsAdjacent(unitElement, skillElement))
                 return AdjacentLearnCost;
-            return AdjacentLearnCost;
+            return OwnElementLearnCost;
         }
     }
 }

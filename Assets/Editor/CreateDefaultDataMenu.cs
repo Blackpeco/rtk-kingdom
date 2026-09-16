@@ -31,10 +31,12 @@ namespace TsOnline.EditorTools
             ElementDefinition wind = WriteElement("Wind", "wind", "Wind", "ลม", ElementType.Wind,
                 new Color(0.40f, 0.82f, 0.55f), "Speed and cuts. ข่ม Earth. Opposite of Water.");
 
-            AssignIcon(earth, "Assets/Art/Icons/earth.png");
-            AssignIcon(water, "Assets/Art/Icons/water.png");
-            AssignIcon(fire, "Assets/Art/Icons/fire.png");
-            AssignIcon(wind, "Assets/Art/Icons/wind.png");
+            int icons = 0;
+            if (AssignIcon(earth, "Assets/Art/Icons/earth.png")) icons++;
+            if (AssignIcon(water, "Assets/Art/Icons/water.png")) icons++;
+            if (AssignIcon(fire, "Assets/Art/Icons/fire.png")) icons++;
+            if (AssignIcon(wind, "Assets/Art/Icons/wind.png")) icons++;
+            Debug.Log("[TS Online] Reassigned " + icons + "/4 element icons (run this after first import if icons are missing).");
 
             SkillDefinition galeSlash = WriteSkill("GaleSlash", "gale_slash", "Gale Slash", "พายุดาบ",
                 1.15f, DamageKind.Physical, ElementType.Wind, SkillCategory.Attack, 8, TargetingFlags.AllEnemies);
@@ -62,8 +64,9 @@ namespace TsOnline.EditorTools
                 1.00f, DamageKind.Physical, ElementType.Earth, SkillCategory.Attack, 4, TargetingFlags.SingleEnemy);
             SkillDefinition divePeck = WriteSkill("DivePeck", "dive_peck", "Dive Peck", "จิกพุ่ง",
                 1.00f, DamageKind.Physical, ElementType.Wind, SkillCategory.Attack, 3, TargetingFlags.SingleEnemy);
-            SkillDefinition basicStrike = WriteSkill("BasicStrike", "basic_strike", "Basic Strike", "โจมตีปกติ",
-                1.00f, DamageKind.Physical, ElementType.None, SkillCategory.Attack, 0, TargetingFlags.SingleEnemy);
+            SkillDefinition basicStrike = WriteSkill("BasicStrike", "basic_strike", "Basic Strike (skill)", "สกิลไร้ธาตุ",
+                1.00f, DamageKind.Physical, ElementType.None, SkillCategory.Attack, 0, TargetingFlags.SingleEnemy,
+                "None-element SKILL (E=1.00). True normal attacks must use DamageRequest.NormalAttack so unit element applies half-strength E (1.12 / 0.90 / 1.00).");
             SkillDefinition mend = WriteSkill("Mend", "mend", "Mend", "รักษา",
                 0.90f, DamageKind.Magical, ElementType.None, SkillCategory.Heal, 6, TargetingFlags.SingleAlly);
 
@@ -80,7 +83,7 @@ namespace TsOnline.EditorTools
             WriteGeneral("YangXiu", "yang_xiu", "Yang Xiu", "หยางซิว", ElementType.Earth,
                 new UnitStats(95, 80, 32, 92, 50, 52), rockslide, earthenWall);
 
-            UnitDefinition wolf = WriteMonster("ForestWolf", "forest_wolf", "Forest Wolf", "หมาป่าป่า", ElementType.Wind,
+            UnitDefinition wolf = WriteMonster("ForestWolf", "forest_wolf", "Forest Wolf", "หมาป่า", ElementType.Wind,
                 new UnitStats(55, 15, 42, 12, 18, 70), windClaw);
             UnitDefinition bandit = WriteMonster("MountainBandit", "mountain_bandit", "Mountain Bandit", "โจรภูเขา", ElementType.Fire,
                 new UnitStats(70, 10, 48, 10, 22, 40), torchSlash);
@@ -123,25 +126,27 @@ namespace TsOnline.EditorTools
             return asset;
         }
 
-        static void AssignIcon(ElementDefinition element, string iconPath)
+        static bool AssignIcon(ElementDefinition element, string iconPath)
         {
             var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
             if (sprite == null)
-                return;
+                return false;
             element.icon = sprite;
             EditorUtility.SetDirty(element);
+            return true;
         }
 
         static SkillDefinition WriteSkill(
             string file, string id, string en, string th,
             float power, DamageKind kind, ElementType element, SkillCategory category,
-            int sp, TargetingFlags targeting)
+            int sp, TargetingFlags targeting, string description = null)
         {
             string path = "Assets/Data/Skills/" + file + ".asset";
             SkillDefinition asset = LoadOrCreate<SkillDefinition>(path);
             asset.id = id;
             asset.displayName = en;
             asset.displayNameThai = th;
+            asset.description = description ?? string.Empty;
             asset.power = power;
             asset.damageKind = kind;
             asset.element = element;

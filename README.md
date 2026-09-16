@@ -1,23 +1,27 @@
-# TS Online — Step 1 (Element + Damage)
+# TS Online — Steps 1–2 (offline)
 
-Single-player offline Unity scaffold for a TS Online–inspired turn-based game.
+Single-player Unity scaffold for a TS Online–inspired turn-based game.
 
-**This commit is Step 1 only:** folder layout, ScriptableObject data, `ElementSystem`, `DamageCalculator`, and Editor / Play Mode formula tests.
+- **Step 1:** `ElementSystem`, `DamageCalculator`, ScriptableObject data, Editor formula tests — **[STEP1.md](STEP1.md)**
+- **Step 2:** 3v3 Battle test (`TurnManager` + `BattleUI`) in `Battle.unity` — **[STEP2.md](STEP2.md)**
 
-Out of scope: World map, networking, gacha, TurnManager, Battle UI, saves.
+Out of scope: World map, networking, gacha, PartyManager persistence, AutoBattle, saves.
 
 ## Open in Unity
 
 1. Install **Unity 2022.3 LTS** or **Unity 6**.
-2. Unity Hub → **Open** → select this folder.
-3. First import will pull **URP** from `Packages/manifest.json`. Unity 6 may upgrade package versions automatically.
-4. After compile finishes, follow **[STEP1.md](STEP1.md)** to run `Tools/TS Online/Run Element Formula Tests`.
+2. Unity Hub → **Open** → this folder.
+3. First import pulls URP from `Packages/manifest.json`. Unity 6 may upgrade packages — accept that.
+4. After compile: **Tools → TS Online → Run Element Formula Tests**, then Play `Assets/Scenes/Battle.unity`.
 
-Target: 2D URP, offline. If materials look pink, create a URP 2D Renderer via **Assets → Create → Rendering → URP Asset (with 2D Renderer)** and assign it in **Project Settings → Graphics**.
+2D URP is **not** auto-assigned (hand-written GraphicsSettings would break across editor versions). Click path: **[Assets/Settings/README_URP.md](Assets/Settings/README_URP.md)**. Formula tests and Battle placeholders work on Built-in.
 
-## Verify formulas (30 seconds)
+If element icons are Missing after first import: **Tools → TS Online → Create Default Data Assets**.
 
+## Verify (30 seconds)
+
+**Formulas (no Unity):** `python3 tools/verify_formulas.py`  
 **Editor:** `Tools → TS Online → Run Element Formula Tests`  
-**Play Mode:** open `Assets/Scenes/Battle.unity`, press Play.
+**Play Mode:** `Battle.unity` → Play → 3v3 commands + Console `PASS`
 
-Look for `PASS` in the Console. Details and the full file list are in `STEP1.md`.
+Normal attacks use `DamageRequest.NormalAttack` (E 1.12 / 0.90). `BasicStrike` is a None-element **skill**, not that path.

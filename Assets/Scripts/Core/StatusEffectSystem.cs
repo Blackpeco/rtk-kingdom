@@ -1,7 +1,9 @@
+using System;
+
 namespace TsOnline
 {
     /// <summary>
-    /// Stub for Step 1. Encodes elemental status rules as data; does not simulate turns.
+    /// Elemental status rules. Step 2 wires apply-chance; full turn simulation of every effect is still light.
     /// Apply chance 30%. Cannot stack multiple element statuses.
     /// </summary>
     public static class StatusEffectSystem
@@ -58,16 +60,39 @@ namespace TsOnline
         }
 
         /// <summary>
-        /// Step 1 stub. Always returns false — StatusEffectSystem is not simulated yet.
+        /// Rolls apply chance. Refuses to stack a second elemental status.
+        /// <paramref name="rng01"/> should return [0,1). Null uses UnityEngine.Random.value.
         /// </summary>
         public static bool TryApply(
             ElementType incomingElement,
             ElementStatusKind currentStatus,
             float applyChance,
-            out ElementStatusKind applied)
+            out ElementStatusKind applied,
+            Func<float> rng01 = null)
         {
             applied = currentStatus;
-            return false;
+            if (incomingElement == ElementType.None)
+                return false;
+
+            ElementStatusSpec spec = GetSpec(incomingElement);
+            if (spec.Kind == ElementStatusKind.None)
+                return false;
+
+            if (currentStatus != ElementStatusKind.None && !CanStackMultipleElementStatuses)
+                return false;
+
+            float chance = applyChance;
+            if (chance < 0f)
+                chance = 0f;
+            if (chance > 1f)
+                chance = 1f;
+
+            float roll = rng01 != null ? rng01() : UnityEngine.Random.value;
+            if (roll >= chance)
+                return false;
+
+            applied = spec.Kind;
+            return true;
         }
     }
 }

@@ -115,6 +115,10 @@ namespace TsOnline
                 ElementSystem.GetLearnCostMultiplier(ElementType.Earth, ElementType.Earth), 1.00f);
             Check(log, ref passed, ref failed, "Adjacent learn cost",
                 ElementSystem.GetLearnCostMultiplier(ElementType.Earth, ElementType.Water), 1.50f);
+            Check(log, ref passed, ref failed, "Opposite learn cost sentinel",
+                ElementSystem.GetLearnCostMultiplier(ElementType.Earth, ElementType.Fire), ElementSystem.CannotLearnCost);
+            Check(log, ref passed, ref failed, "Water vs Wind learn cost sentinel",
+                ElementSystem.GetLearnCostMultiplier(ElementType.Water, ElementType.Wind), ElementSystem.CannotLearnCost);
 
             log("[TS Online] === Sample Final damage (RNG fixed at 1.00 mid) ===");
             var calc = DamageCalculator.Deterministic(1.0f);
@@ -157,6 +161,27 @@ namespace TsOnline
                 false, 0f, 0f, true);
             DamageResult critResult = calc.Calculate(crit);
             Check(log, ref passed, ref failed, "Crit Final (80 * 1.25 * 1.5)", critResult.FinalDamage, 150f);
+
+            // M=0.50 must clamp to 0.15 → 80 * 1.25 * 1.15 = 115
+            var overMastery = new DamageRequest(
+                100f, 0f, 40f, 1.0f,
+                DamageKind.Physical, SkillCategory.Attack,
+                ElementType.Earth, ElementType.Earth, ElementType.Water,
+                false, 0.50f, 0f, false);
+            DamageResult overM = calc.Calculate(overMastery);
+            Check(log, ref passed, ref failed, "M 0.50 clamped to 0.15 (factor)", overM.MasteryFactor, 1.15f);
+            Check(log, ref passed, ref failed, "Final with clamped M (80 * 1.25 * 1.15)", overM.FinalDamage, 115f);
+
+            // Magic: Base = 100 * 1.0 - 40 * 0.25 = 90; Water vs Fire ข่ม E=1.25 → 112.5
+            var magic = new DamageRequest(
+                0f, 100f, 40f, 1.0f,
+                DamageKind.Magical, SkillCategory.Attack,
+                ElementType.Water, ElementType.Water, ElementType.Fire,
+                false, 0f, 0f, false);
+            DamageResult mag = calc.Calculate(magic);
+            Check(log, ref passed, ref failed, "Magic Base (INT 100, pwr 1, DEF 40)", mag.BaseDamage, 90f);
+            Check(log, ref passed, ref failed, "Magic E (Water vs Fire)", mag.ElementMultiplier, 1.25f);
+            Check(log, ref passed, ref failed, "Magic Final (90 * 1.25)", mag.FinalDamage, 112.5f);
 
             return passed;
         }

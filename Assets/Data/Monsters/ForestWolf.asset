@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: forest_wolf
   displayName: Forest Wolf
-  displayNameThai: หมาป่าป่า
+  displayNameThai: หมาป่า
   element: 4
   baseStats:
     hp: 55

@@ -54,9 +54,7 @@ namespace TsOnline
             else
                 e = ElementSystem.GetSkillElementMultiplier(request.SkillElement, request.TargetElement);
 
-            float m = request.Mastery;
-            if (m < 0f)
-                m = 0f;
+            float m = ElementSystem.ClampMastery(request.Mastery);
             float masteryFactor = 1f + m;
 
             float r = ElementSystem.ClampResist(request.Resist);

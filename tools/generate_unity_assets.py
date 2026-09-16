@@ -712,7 +712,7 @@ def main() -> None:
         "BogSpit": ("bog_spit", "Bog Spit", "น้ำลายบึง", 1.10, 1, 2, 0, 5, 8),
         "StoneFist": ("stone_fist", "Stone Fist", "หมัดหิน", 1.00, 0, 1, 0, 4, 8),
         "DivePeck": ("dive_peck", "Dive Peck", "จิกพุ่ง", 1.00, 0, 4, 0, 3, 8),
-        "BasicStrike": ("basic_strike", "Basic Strike", "โจมตีปกติ", 1.00, 0, 0, 0, 0, 8),
+        "BasicStrike": ("basic_strike", "Basic Strike (skill)", "สกิลไร้ธาตุ", 1.00, 0, 0, 0, 0, 8),
         "Mend": ("mend", "Mend", "รักษา", 0.90, 1, 0, 1, 6, 2),
     }
     skill_guids = {}
@@ -737,7 +737,7 @@ def main() -> None:
         )
 
     monsters = [
-        ("ForestWolf", "forest_wolf", "Forest Wolf", "หมาป่าป่า", 4, (55, 15, 42, 12, 18, 70), ["WindClaw"]),
+        ("ForestWolf", "forest_wolf", "Forest Wolf", "หมาป่า", 4, (55, 15, 42, 12, 18, 70), ["WindClaw"]),
         ("MountainBandit", "mountain_bandit", "Mountain Bandit", "โจรภูเขา", 3, (70, 10, 48, 10, 22, 40), ["TorchSlash"]),
         ("SwampFrog", "swamp_frog", "Swamp Frog", "กบทึง", 2, (50, 20, 28, 30, 16, 35), ["BogSpit"]),
         ("SmallStoneGolem", "small_stone_golem", "Small Stone Golem", "โกเล็มหินเล็ก", 1, (90, 10, 35, 8, 40, 15), ["StoneFist"]),
