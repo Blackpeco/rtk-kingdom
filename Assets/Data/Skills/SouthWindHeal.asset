@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9516a9e90925982122a908b2b910fe3e, type: 3}
+  m_Name: SouthWindHeal
+  m_EditorClassIdentifier: 
+  id: south_wind_heal
+  displayName: South Wind Heal
+  displayNameThai: ลมใต้ฟื้นชีพ
+  power: 1.0
+  damageKind: 1
+  element: 2
+  category: 1
+  spCost: 12
+  targeting: 2
+  overrideStatusApplyChance: 0
+  statusApplyChance: 0.3

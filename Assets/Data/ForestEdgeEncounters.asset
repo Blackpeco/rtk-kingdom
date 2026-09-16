@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84677f999bea04db86a90e3e41e202ef, type: 3}
+  m_Name: ForestEdgeEncounters
+  m_EditorClassIdentifier: 
+  id: forest_edge
+  displayName: Forest Edge
+  possibleMonsters:
+  - {fileID: 11400000, guid: 44d9ea82b8ea8a8425a62d7529511e49, type: 2}
+  - {fileID: 11400000, guid: 21403106d1e3ce4aa17858fb94ebd0f9, type: 2}
+  - {fileID: 11400000, guid: 1810761c737f0e665670b316a22f55bb, type: 2}
+  - {fileID: 11400000, guid: 3fe11ef69473bc3a1730a629c4de4617, type: 2}
+  - {fileID: 11400000, guid: af31e78b4e0b9407f2e95a1ae977627c, type: 2}
+  - {fileID: 11400000, guid: 84cfea2baedeb5f6834273378fd0d877, type: 2}
+  minCount: 1
+  maxCount: 3

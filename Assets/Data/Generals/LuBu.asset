@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 507e7486aa9023513dc4911d2574ab84, type: 3}
+  m_Name: LuBu
+  m_EditorClassIdentifier: 
+  id: lu_bu
+  displayName: Lu Bu
+  displayNameThai: ลิโป้
+  element: 3
+  baseStats:
+    hp: 130
+    sp: 30
+    atk: 110
+    intel: 25
+    def: 48
+    agi: 80
+  startingSkills:
+  - {fileID: 11400000, guid: 359e73760f1c7fc8d9bd0f28a7e56159, type: 2}
+  - {fileID: 11400000, guid: bdb9ef3efeddd81d2d293a35b8c16357, type: 2}
+  isGeneral: 1
+  isMonster: 0

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 507e7486aa9023513dc4911d2574ab84, type: 3}
+  m_Name: ZhugeLiang
+  m_EditorClassIdentifier: 
+  id: zhuge_liang
+  displayName: Zhuge Liang
+  displayNameThai: ขงเบ้ง
+  element: 2
+  baseStats:
+    hp: 85
+    sp: 90
+    atk: 28
+    intel: 105
+    def: 38
+    agi: 60
+  startingSkills:
+  - {fileID: 11400000, guid: a5ad2ec4bd112515f897e803c06e9814, type: 2}
+  - {fileID: 11400000, guid: 8290147adb297b24541df8c5f6836c45, type: 2}
+  - {fileID: 11400000, guid: 3b3b47e68d5376b685d84bb1ab96976e, type: 2}
+  isGeneral: 1
+  isMonster: 0

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c19f04c028f0ac693669d05099c77186, type: 3}
+  m_Name: Fire
+  m_EditorClassIdentifier: 
+  id: fire
+  displayName: Fire
+  displayNameThai: ไฟ
+  element: 3
+  icon: {fileID: 1537655125, guid: eb5863befea9e5d727d619e996f189f4, type: 3}
+  color: {r: 0.86, g: 0.24, b: 0.18, a: 1}
+  roleBlurb: Burst and burn. Beats Wind (ข่มลม). Opposite of Earth.

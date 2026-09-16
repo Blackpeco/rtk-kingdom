@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 507e7486aa9023513dc4911d2574ab84, type: 3}
+  m_Name: ForestWolf
+  m_EditorClassIdentifier: 
+  id: forest_wolf
+  displayName: Forest Wolf
+  displayNameThai: หมาป่าป่า
+  element: 4
+  baseStats:
+    hp: 55
+    sp: 15
+    atk: 42
+    intel: 12
+    def: 18
+    agi: 70
+  startingSkills:
+  - {fileID: 11400000, guid: ccf3162d53de6328fc0162bdf63ebb5d, type: 2}
+  isGeneral: 0
+  isMonster: 1
