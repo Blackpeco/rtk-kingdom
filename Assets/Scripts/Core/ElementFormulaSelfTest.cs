@@ -120,6 +120,20 @@ namespace TsOnline
             Check(log, ref passed, ref failed, "Water vs Wind learn cost sentinel",
                 ElementSystem.GetLearnCostMultiplier(ElementType.Water, ElementType.Wind), ElementSystem.CannotLearnCost);
 
+            log("[TS Online] === Wind skip: evaluate while active, then tick 1-turn duration ===");
+            bool skipped;
+            ElementStatusKind after;
+            int turnsAfter;
+            StatusTurnFlow.SimulateWindTurnStart(ElementStatusKind.WindSkip, 1, 0f, out skipped, out after, out turnsAfter);
+            ExpectTrue(log, ref passed, ref failed, "Wind skip roll 0.00 skips while status active", skipped);
+            ExpectTrue(log, ref passed, ref failed, "1-turn Wind expires after that check", after == ElementStatusKind.None);
+            StatusTurnFlow.SimulateWindTurnStart(ElementStatusKind.WindSkip, 1, 0.99f, out skipped, out after, out turnsAfter);
+            ExpectFalse(log, ref passed, ref failed, "Wind skip roll 0.99 does not skip", skipped);
+            ExpectTrue(log, ref passed, ref failed, "1-turn Wind still expires after no-skip roll", after == ElementStatusKind.None);
+            StatusTurnFlow.SimulateWindTurnStart(ElementStatusKind.None, 0, 0f, out skipped, out after, out turnsAfter);
+            ExpectFalse(log, ref passed, ref failed, "No status: no skip even with roll 0", skipped);
+            StatusTurnFlow.ForceNextSkipRoll = null;
+
             log("[TS Online] === Sample Final damage (RNG fixed at 1.00 mid) ===");
             var calc = DamageCalculator.Deterministic(1.0f);
 

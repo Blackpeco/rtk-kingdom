@@ -116,6 +116,15 @@ def main() -> None:
     check("Magic Base INT100 DEF40", magic_base, 90)
     check("Magic Final Water vs Fire", magic_base * 1.25, 112.5)
 
+    wind_chance = 0.25
+
+    def wind_skip(status: str, roll: float) -> bool:
+        return status == "WindSkip" and roll < wind_chance
+
+    expect("Wind skip while active (roll 0)", wind_skip("WindSkip", 0.0), True)
+    expect("Wind no skip (roll 0.99)", wind_skip("WindSkip", 0.99), False)
+    expect("No status no skip", wind_skip("None", 0.0), False)
+
     if failed:
         raise SystemExit(f"{failed} failed")
     print("All formula mirrors PASS")

@@ -109,6 +109,17 @@ namespace TsOnline
             return true;
         }
 
+        /// <summary>
+        /// Evaluate Wind skip while the status is still active, then tick durations.
+        /// A 1-turn Wind status therefore still produces exactly one skip check.
+        /// </summary>
+        public bool BeginTurn(System.Action<string> log)
+        {
+            bool skip = RollSkipTurn();
+            TickStatusAtTurnStart(log);
+            return skip;
+        }
+
         public void TickStatusAtTurnStart(System.Action<string> log)
         {
             if (status == ElementStatusKind.None)
@@ -134,9 +145,14 @@ namespace TsOnline
 
         public bool RollSkipTurn()
         {
-            if (status != ElementStatusKind.WindSkip)
-                return false;
-            return Random.value < StatusEffectSystem.WindSkipChance;
+            return StatusTurnFlow.ShouldSkipTurn(status, null);
+        }
+
+        [ContextMenu("QA: Force Wind skip (1 turn)")]
+        public void DebugForceWindSkip()
+        {
+            ApplyStatus(ElementStatusKind.WindSkip, 1);
+            StatusTurnFlow.ForceNextSkipRoll = 0f;
         }
 
         public void ApplyStatus(ElementStatusKind kind, int turns)

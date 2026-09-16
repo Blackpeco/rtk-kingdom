@@ -112,6 +112,15 @@ namespace TsOnline
             if (command == BattleCommand.Attack)
             {
                 var targets = Living(EnemyUnits);
+                if (targets.Count == 0)
+                {
+                    if (CheckEnd())
+                        return;
+                    Log("ไม่มีศัตรูให้โจมตี");
+                    Notify();
+                    return;
+                }
+
                 if (targets.Count == 1)
                 {
                     ResolveAttack(CurrentActor, targets[0]);
@@ -242,7 +251,8 @@ namespace TsOnline
                     continue;
 
                 CurrentActor = unit;
-                unit.TickStatusAtTurnStart(Log);
+                // Skip/Wind must be evaluated while the status is still active, then durations tick.
+                bool skipTurn = unit.BeginTurn(Log);
                 if (!unit.IsAlive)
                 {
                     if (CheckEnd())
@@ -250,7 +260,7 @@ namespace TsOnline
                     continue;
                 }
 
-                if (unit.RollSkipTurn())
+                if (skipTurn)
                 {
                     Log(unit.ShortName + " เสียเทิร์นจากสถานะลม");
                     continue;

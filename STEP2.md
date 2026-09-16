@@ -1,6 +1,6 @@
 # Step 2 — 3v3 Battle test (offline)
 
-Thai + English. World map, networking, PartyManager, AutoBattle, and saves are **out of scope**.
+Thai + English. Full World map is **Step 3** (`STEP3.md`). Networking, AutoBattle, and saves remain out of scope.
 
 ## What you can play
 
@@ -69,6 +69,11 @@ Editor formula menu is unchanged: **Tools → TS Online → Run Element Formula 
 - BasicStrike labeled as a **None-element skill**; true normal attack = `DamageRequest.NormalAttack`
 - Create Default Data Assets reassigns element icons
 - Self-test + `tools/verify_formulas.py`: M clamp, opposite learn -1, magic Base with DEF
+
+## Wind skip (fixed in Step 3)
+
+Turn start now calls `BattleUnit.BeginTurn`: **roll skip while Wind is active**, then tick duration.  
+Play Mode: on an enemy `BattleUnit`, gear menu **QA: Force Wind skip (1 turn)** — next turn they pass. See STEP3.md.
 
 ## ภาษาไทย — เปิดซีนรบ
 

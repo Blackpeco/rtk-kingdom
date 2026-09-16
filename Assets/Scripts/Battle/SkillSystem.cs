@@ -51,14 +51,13 @@ namespace TsOnline
                 return SkillResolveResult.Fail("ผู้ใช้หมดสติ");
             if (skill == null)
                 return SkillResolveResult.Fail("ไม่มีสกิล");
+            if (targets == null || targets.Length == 0)
+                return SkillResolveResult.Fail("ไม่มีเป้าหมาย");
             if (!user.TrySpendSp(skill.spCost))
                 return SkillResolveResult.Fail("SP ไม่พอ");
 
             if (calc == null)
                 calc = new DamageCalculator();
-
-            if (targets == null || targets.Length == 0)
-                return new SkillResolveResult(true, null, skill, new SkillHit[0]);
 
             var hits = new SkillHit[targets.Length];
             for (int i = 0; i < targets.Length; i++)

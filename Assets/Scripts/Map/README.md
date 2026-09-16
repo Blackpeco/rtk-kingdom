@@ -1,1 +1,1 @@
-Reserved for Step 2+ World map. Do not put element or damage logic here.
+World movement + forest encounters (Step 3). Open `World.unity` or Play `Boot.unity` (loads World).

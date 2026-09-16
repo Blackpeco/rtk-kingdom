@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -26,6 +28,7 @@ namespace TsOnline
 
         TurnManager _turns;
         BattleUI _ui;
+        bool _returning;
 
         void Start()
         {
@@ -52,12 +55,45 @@ namespace TsOnline
             var players = SpawnSide(playerParty, true);
             var enemies = SpawnSide(enemyParty, false);
             _turns.Setup(players, enemies);
+            _turns.OnChanged += HandleBattleChanged;
             _ui.Bind(_turns);
             _turns.BeginBattle();
         }
 
+        void HandleBattleChanged()
+        {
+            if (_turns == null || _turns.State != BattleState.Ended || _returning)
+                return;
+            _returning = true;
+            if (_turns.Escaped)
+                EncounterContext.LastEnd = BattleEndKind.Escape;
+            else if (_turns.PlayerWon)
+                EncounterContext.LastEnd = BattleEndKind.Win;
+            else
+                EncounterContext.LastEnd = BattleEndKind.Lose;
+
+            if (!EncounterContext.ShouldReturnToWorld)
+                return;
+            StartCoroutine(ReturnToWorld());
+        }
+
+        IEnumerator ReturnToWorld()
+        {
+            yield return new WaitForSeconds(1.8f);
+            string scene = string.IsNullOrEmpty(EncounterContext.ReturnScene) ? "World" : EncounterContext.ReturnScene;
+            SceneManager.LoadScene(scene);
+        }
+
         void ResolveRoster()
         {
+            if (EncounterContext.HasPending)
+            {
+                if (EncounterContext.PlayerParty != null)
+                    playerParty = EncounterContext.PlayerParty;
+                if (EncounterContext.Enemies != null)
+                    enemyParty = EncounterContext.Enemies;
+            }
+
             if (encounterConfig == null)
                 encounterConfig = Resources.Load<BattleTestConfig>("Battle/DefaultEncounter");
 

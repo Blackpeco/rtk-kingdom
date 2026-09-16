@@ -1,0 +1,52 @@
+using UnityEngine;
+
+namespace TsOnline
+{
+    /// <summary>
+    /// Session handoff World → Battle → World. Survives LoadScene without a DontDestroy object.
+    /// </summary>
+    public static class EncounterContext
+    {
+        public static bool HasPending;
+        public static bool ShouldReturnToWorld;
+        public static string ReturnScene = "World";
+        public static Vector3 ReturnPosition;
+        public static UnitDefinition[] PlayerParty;
+        public static UnitDefinition[] Enemies;
+        public static string EncounterName;
+        public static BattleEndKind LastEnd = BattleEndKind.None;
+
+        public static void Begin(
+            UnitDefinition[] party,
+            UnitDefinition[] enemies,
+            Vector3 returnPosition,
+            string encounterName)
+        {
+            PlayerParty = party;
+            Enemies = enemies;
+            ReturnPosition = returnPosition;
+            EncounterName = encounterName;
+            ReturnScene = "World";
+            HasPending = true;
+            ShouldReturnToWorld = true;
+        }
+
+        public static void MarkReturned()
+        {
+            HasPending = false;
+        }
+
+        public static void ClearReturn()
+        {
+            ShouldReturnToWorld = false;
+        }
+    }
+
+    public enum BattleEndKind
+    {
+        None = 0,
+        Win = 1,
+        Lose = 2,
+        Escape = 3
+    }
+}
