@@ -31,9 +31,11 @@ namespace TsOnline
             ShouldReturnToWorld = true;
         }
 
+        /// <summary>World finished applying the return spawn. Clears both pending flags so a later Play on Battle.unity is a sandbox 3v3.</summary>
         public static void MarkReturned()
         {
             HasPending = false;
+            ShouldReturnToWorld = false;
         }
 
         public static void ClearReturn()

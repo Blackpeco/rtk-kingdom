@@ -10,7 +10,8 @@ using UnityEditor;
 namespace TsOnline
 {
     /// <summary>
-    /// World encounters spawn the PartyManager roster. Direct Play on Battle.unity uses the inspector / DefaultEncounter 3v3 — it does not hydrate a save.
+    /// World encounters spawn the PartyManager roster and persist the save.
+    /// Direct Play on Battle.unity uses the inspector / DefaultEncounter 3v3 — it does not hydrate a save and does not write ts_online_save.json.
     /// </summary>
     public class BattleBootstrap : MonoBehaviour
     {
@@ -29,9 +30,13 @@ namespace TsOnline
         TurnManager _turns;
         BattleUI _ui;
         bool _returning;
+        /// <summary>Captured at Start from <see cref="EncounterContext.HasPending"/>. Leftover ShouldReturnToWorld must not count.</summary>
+        bool _cameFromWorld;
 
         void Start()
         {
+            _cameFromWorld = EncounterContext.HasPending;
+
             if (runFormulaSmokeTest)
             {
                 string report = ElementFormulaSelfTest.RunAndFormat();
@@ -56,7 +61,7 @@ namespace TsOnline
             _ui = gameObject.AddComponent<BattleUI>();
             var auto = gameObject.AddComponent<AutoBattleController>();
 
-            var players = FromWorldEncounter() ? SpawnPlayersFromParty() : SpawnSide(playerParty, true, null);
+            var players = _cameFromWorld ? SpawnPlayersFromParty() : SpawnSide(playerParty, true, null);
             var enemies = SpawnSide(enemyParty, false, null);
             _turns.Setup(players, enemies);
             _turns.OnChanged += HandleBattleChanged;
@@ -83,23 +88,28 @@ namespace TsOnline
             if (_turns.PlayerWon)
             {
                 pm.AwardWinExp(enemyParty);
-                if (EncounterContext.ShouldReturnToWorld)
+                if (_cameFromWorld)
                     QuestTracker.NotifyForestWin();
             }
             if (_ui != null)
                 _ui.NoteRewards(pm.LastRewardSummary);
-            SaveService.Save(EncounterContext.ShouldReturnToWorld
-                ? EncounterContext.ReturnPosition
-                : (Vector3?)null);
+            PersistPartyIfWorldEncounter();
 
-            System.Action goHome = EncounterContext.ShouldReturnToWorld
+            System.Action goHome = _cameFromWorld
                 ? () => StartCoroutine(ReturnToWorld())
                 : (System.Action)null;
 
             if (pm.PendingPoints() > 0 && _ui != null)
-                _ui.OpenLevelUp(goHome);
+                _ui.OpenLevelUp(goHome, _cameFromWorld);
             else if (goHome != null)
                 StartCoroutine(ReturnToWorld());
+        }
+
+        void PersistPartyIfWorldEncounter()
+        {
+            if (!_cameFromWorld)
+                return;
+            SaveService.Save(EncounterContext.ReturnPosition);
         }
 
         IEnumerator ReturnToWorld()
@@ -111,7 +121,7 @@ namespace TsOnline
 
         static bool FromWorldEncounter()
         {
-            return EncounterContext.HasPending || EncounterContext.ShouldReturnToWorld;
+            return EncounterContext.HasPending;
         }
 
         void ResolveRoster()

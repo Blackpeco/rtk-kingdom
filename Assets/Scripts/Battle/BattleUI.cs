@@ -18,6 +18,7 @@ namespace TsOnline
         bool _showLevelUp;
         int _levelPick;
         System.Action _afterLevelUp;
+        bool _persistSaveAfterLevelUp;
 
         Font _font;
         Canvas _canvas;
@@ -79,10 +80,11 @@ namespace TsOnline
                 _banner.text = (_turns != null ? _turns.Banner : "") + "  ·  " + summary;
         }
 
-        public void OpenLevelUp(System.Action afterDone)
+        public void OpenLevelUp(System.Action afterDone, bool persistSave = false)
         {
             _showLevelUp = true;
             _afterLevelUp = afterDone;
+            _persistSaveAfterLevelUp = persistSave;
             PartyManager pm = PartyManager.Ensure();
             _levelPick = 0;
             for (int i = 0; i < pm.Party.Count; i++)
@@ -210,9 +212,9 @@ namespace TsOnline
         void FinishLevelUp()
         {
             _showLevelUp = false;
-            SaveService.Save(EncounterContext.ShouldReturnToWorld
-                ? EncounterContext.ReturnPosition
-                : (Vector3?)null);
+            if (_persistSaveAfterLevelUp)
+                SaveService.Save(EncounterContext.ReturnPosition);
+            _persistSaveAfterLevelUp = false;
             System.Action done = _afterLevelUp;
             _afterLevelUp = null;
             if (done != null)

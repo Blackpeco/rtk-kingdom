@@ -52,7 +52,7 @@ Top-right of Battle:
 3. Fight and **win** (or Play `Battle.unity` and win the default 3v3).
 4. Banner / log: `ได้ EXP 44` (or 66 for the 3-pack Frog). Each member should show **+1 Lv** and **3 pts**.
 5. On the level-up panel, pick **จูล่ง** → click **ATK +2** (or HP / AGI). Points decrement; ATK (or HP/AGI) rises.
-6. **กลับโลก** (World fight) or **ดำเนินการต่อ** (direct Battle). World strip shows **Lv2** and the new stats.
+6. **กลับโลก** (World fight) writes the allocated points to the save. **ดำเนินการต่อ** (direct `Battle.unity`) keeps points in memory only and does **not** write `ts_online_save.json`. After a World fight the strip shows **Lv2** and the new stats.
 
 ### 2. Party panel change lineup
 

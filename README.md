@@ -36,6 +36,6 @@ Missing icons: **Tools → TS Online → Create Default Data Assets**.
 
 **Formulas:** `python3 tools/verify_formulas.py`  
 **Create:** Boot with no save → name + ดิน/น้ำ/ไฟ/ลม → World HUD shows that name  
-**World / Battle:** Patoyo, quest, F5/F9, auto battle. Direct `Battle.unity` stays the test 3v3.
+**World / Battle:** Patoyo, quest, F5/F9, auto battle. Direct `Battle.unity` stays the test 3v3 and does not write the player save.
 
 Normal attacks use `DamageRequest.NormalAttack`. `BasicStrike` is a None-element skill.
