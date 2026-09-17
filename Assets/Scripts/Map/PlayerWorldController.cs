@@ -14,6 +14,17 @@ namespace TsOnline
             get { return PartyMenuOpen || DialogueOpen; }
         }
 
+        /// <summary>Party (P) and ยายเมือง dialog (E) are mutually exclusive.</summary>
+        public static bool CanOpenParty
+        {
+            get { return !DialogueOpen; }
+        }
+
+        public static bool CanOpenDialogue
+        {
+            get { return !PartyMenuOpen; }
+        }
+
         public float moveSpeed = 4.2f;
         Rigidbody2D _body;
 
