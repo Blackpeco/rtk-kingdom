@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cf5ed264cfd842ae8fdef9a62dfc0c2, type: 3}
+  m_Name: SkillKit
+  m_EditorClassIdentifier: 
+  basicStrike: {fileID: 11400000, guid: bdb9ef3efeddd81d2d293a35b8c16357, type: 2}
+  stoneFist: {fileID: 11400000, guid: 187e70803b31e37af98235daf2c13ddc, type: 2}
+  mend: {fileID: 11400000, guid: 3b3b47e68d5376b685d84bb1ab96976e, type: 2}
+  torchSlash: {fileID: 11400000, guid: 66bc9539b82edfbf344af0d293d2fb50, type: 2}
+  windClaw: {fileID: 11400000, guid: ccf3162d53de6328fc0162bdf63ebb5d, type: 2}

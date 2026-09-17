@@ -210,6 +210,9 @@ namespace TsOnline
         void FinishLevelUp()
         {
             _showLevelUp = false;
+            SaveService.Save(EncounterContext.ShouldReturnToWorld
+                ? EncounterContext.ReturnPosition
+                : (Vector3?)null);
             System.Action done = _afterLevelUp;
             _afterLevelUp = null;
             if (done != null)

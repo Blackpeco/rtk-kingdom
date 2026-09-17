@@ -253,6 +253,7 @@ SCRIPTS = [
     "Assets/Scripts/Map/CharacterCreateUI.cs",
     "Assets/Scripts/Map/PatoyoFollower.cs",
     "Assets/Scripts/Party/CreatedHero.cs",
+    "Assets/Scripts/Party/CreatedHeroKit.cs",
     "Assets/Scripts/Battle/PatoyoHelper.cs",
     "Assets/Scripts/Quest/QuestTracker.cs",
     "Assets/Scripts/Quest/CityQuestNpc.cs",

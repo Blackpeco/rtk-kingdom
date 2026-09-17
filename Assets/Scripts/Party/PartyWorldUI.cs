@@ -83,7 +83,7 @@ namespace TsOnline
             var box = new Rect((Screen.width - w) * 0.5f, (Screen.height - h) * 0.5f, w, h);
             GUI.Box(box, "");
             GUI.Label(new Rect(box.x + 16, box.y + 10, w - 32, 24),
-                "ปาร์ตี้ — สลับลำดับ / เพิ่มจาก 6 ขุนพล   (ตาในรบยังเรียงตาม AGI)");
+                "ปาร์ตี้ — สลับลำดับ / เพิ่มจาก 6 ขุนพล   (หัวหน้าเอาออกไม่ได้ · ตาในรบเรียง AGI)");
 
             float col = (w - 48f) * 0.5f;
             GUI.Label(new Rect(box.x + 16, box.y + 40, col, 20), "กำลังเดินทาง (" + pm.Party.Count + "/" + PartyManager.MaxParty + ")");
@@ -97,7 +97,9 @@ namespace TsOnline
                     pm.MoveParty(i, -1);
                 if (GUI.Button(new Rect(box.x + 16 + col - 98, y, 44, 32), "▼"))
                     pm.MoveParty(i, 1);
-                if (GUI.Button(new Rect(box.x + 16 + col - 50, y, 44, 32), "ออก"))
+                if (m != null && m.IsCreatedLead)
+                    GUI.Label(new Rect(box.x + 16 + col - 50, y, 44, 32), "หัวหน้า");
+                else if (GUI.Button(new Rect(box.x + 16 + col - 50, y, 44, 32), "ออก"))
                     pm.TryRemoveFromParty(m);
             }
 

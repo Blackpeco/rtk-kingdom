@@ -1,9 +1,5 @@
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 namespace TsOnline
 {
     /// <summary>Runtime player lead created on CharacterCreate. Not one of the 6 generals.</summary>
@@ -130,25 +126,9 @@ namespace TsOnline
 
         static SkillDefinition[] LoadStartingSkills(ElementType element)
         {
-            SkillDefinition basic = LoadSkill("Assets/Data/Skills/BasicStrike.asset");
-            string extraPath;
-            switch (element)
-            {
-                case ElementType.Earth:
-                    extraPath = "Assets/Data/Skills/StoneFist.asset";
-                    break;
-                case ElementType.Water:
-                    extraPath = "Assets/Data/Skills/Mend.asset";
-                    break;
-                case ElementType.Fire:
-                    extraPath = "Assets/Data/Skills/TorchSlash.asset";
-                    break;
-                default:
-                    extraPath = "Assets/Data/Skills/WindClaw.asset";
-                    break;
-            }
-
-            SkillDefinition extra = LoadSkill(extraPath);
+            CreatedHeroKit kit = Resources.Load<CreatedHeroKit>("CreatedHero/SkillKit");
+            SkillDefinition basic = kit != null ? kit.basicStrike : null;
+            SkillDefinition extra = kit != null ? kit.ExtraFor(element) : null;
             if (basic != null && extra != null)
                 return new[] { extra, basic };
             if (extra != null)
@@ -156,16 +136,6 @@ namespace TsOnline
             if (basic != null)
                 return new[] { basic };
             return new SkillDefinition[0];
-        }
-
-        static SkillDefinition LoadSkill(string path)
-        {
-#if UNITY_EDITOR
-            SkillDefinition fromEditor = AssetDatabase.LoadAssetAtPath<SkillDefinition>(path);
-            if (fromEditor != null)
-                return fromEditor;
-#endif
-            return null;
         }
     }
 }

@@ -9,7 +9,12 @@ Offline. Boot with **no save** opens this scene instead of World defaults.
 3. **เริ่มเดินทาง** → World. Created hero is party lead (not one of the 6 generals). Recruit generals later with **P**.
 4. **Has save** → World as before (party / quest / position restored).
 
-Direct Play on **`World.unity`** or **`Battle.unity`** still uses the Step 4 default 3 generals if you never created a hero — so those loops stay testable.
+Direct Play on **`World.unity`** still uses the Step 4 default 3 generals if you never created a hero.  
+**`Battle.unity`** always uses the wired test 3v3 (it does not hydrate a save). World encounters use the created lead.
+
+**เริ่มเดินทาง** / `BeginNewGame` clears quest, inventory, and auto-battle prefs (same statics as **F8**), so Disable Domain Reload cannot leave a finished quest + herbs on a new hero.
+
+A save file that fails to load is **deleted**; Boot then opens CharacterCreate instead of trapping you in a default World.
 
 ## Starting stats
 
@@ -30,7 +35,7 @@ Everyone also gets Basic Strike. World avatar color matches the element. HUD tit
 2. Play **Boot**. After ~0.4s you must see **สร้างตัวละคร**, not the city.
 3. Type a name (e.g. `มีนา`). Click **Fire / ไฟ**. Confirm ATK 100, DEF 28.
 4. **เริ่มเดินทาง**. World title: `มีนา  ไฟ`. Gold-red lead quad. Party strip line 1 is มีนา, not จูล่ง.
-5. **P** — roster still has the 6 generals; **เข้า** still works. The created lead cannot be **ออก**.
+5. **P** — roster still has the 6 generals; **เข้า** still works. The created lead shows **หัวหน้า** (no ออก).
 
 Repeat once per element (or check the preview numbers before confirm).
 
@@ -46,7 +51,10 @@ Any of:
 
 - World: **เกมใหม่ / ลบเซฟ (F8)** — deletes the JSON, resets party/quest, loads CharacterCreate.
 - Delete `Application.persistentDataPath/ts_online_save.json` (path is logged on **F5**).
+- Trash the JSON so `TryLoad` fails — Boot discards it and opens create.
 - Then Play **Boot** — create screen again.
+
+After a Battle-only win, **ดำเนินการต่อ** on the level-up panel writes the allocated points to the save (same as World return).
 
 ## Files
 
@@ -54,6 +62,7 @@ Any of:
 | --- | --- |
 | `Assets/Scripts/Map/CharacterCreateUI.cs` | Name + element UI |
 | `Assets/Scripts/Party/CreatedHero.cs` | Stats, skills, runtime `UnitDefinition` |
+| `Assets/Resources/CreatedHero/SkillKit.asset` | Starting skills for player builds |
 | `Assets/Scripts/Map/BootLoader.cs` | Save → World, else CharacterCreate |
 | `SaveService` / `GameSave` | `playerName`, `playerElement`, wipe |
 | `PartyManager.BeginNewGame` | Lead + unlocked generals |

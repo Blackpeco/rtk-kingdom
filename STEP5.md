@@ -42,7 +42,7 @@ Persists: roster ids, party order, level / EXP / unspent / bonus stats / HP / SP
 | Leave Battle → World | Party write-back, EXP, quest progress, position |
 | Quest accept / complete | Party + quest + bag |
 
-**Boot** calls `SaveService.HydrateIfNeeded()` before World. Playing `World.unity` directly does the same once per session (does **not** reload over in-memory state when you return from Battle).
+**Boot** loads only if the save file exists **and** `TryLoad` succeeds; a missing or corrupt file opens CharacterCreate (the bad file is deleted). Playing `World.unity` directly still calls `HydrateIfNeeded` once per session (does **not** reload over in-memory state when you return from Battle).
 
 ### Verify save
 

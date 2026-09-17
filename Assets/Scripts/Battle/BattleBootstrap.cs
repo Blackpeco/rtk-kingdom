@@ -10,7 +10,7 @@ using UnityEditor;
 namespace TsOnline
 {
     /// <summary>
-    /// Spawns the current PartyManager roster vs encounter enemies. Direct Play on Battle.unity uses the default 3 generals.
+    /// World encounters spawn the PartyManager roster. Direct Play on Battle.unity uses the inspector / DefaultEncounter 3v3 — it does not hydrate a save.
     /// </summary>
     public class BattleBootstrap : MonoBehaviour
     {
@@ -41,7 +41,6 @@ namespace TsOnline
                     Debug.Log(report);
             }
 
-            SaveService.HydrateIfNeeded();
             PatoyoHelper.ResetForBattle();
 
             ResolveRoster();
@@ -57,7 +56,7 @@ namespace TsOnline
             _ui = gameObject.AddComponent<BattleUI>();
             var auto = gameObject.AddComponent<AutoBattleController>();
 
-            var players = SpawnPlayers();
+            var players = FromWorldEncounter() ? SpawnPlayersFromParty() : SpawnSide(playerParty, true, null);
             var enemies = SpawnSide(enemyParty, false, null);
             _turns.Setup(players, enemies);
             _turns.OnChanged += HandleBattleChanged;
@@ -110,11 +109,19 @@ namespace TsOnline
             SceneManager.LoadScene(scene);
         }
 
+        static bool FromWorldEncounter()
+        {
+            return EncounterContext.HasPending || EncounterContext.ShouldReturnToWorld;
+        }
+
         void ResolveRoster()
         {
-            PartyManager pm = PartyManager.Ensure();
-            if (pm.Party.Count > 0)
-                playerParty = pm.ActiveDefinitions();
+            if (FromWorldEncounter())
+            {
+                PartyManager pm = PartyManager.Ensure();
+                if (pm.Party.Count > 0)
+                    playerParty = pm.ActiveDefinitions();
+            }
 
             if (EncounterContext.HasPending)
             {
@@ -197,7 +204,7 @@ namespace TsOnline
             return trimmed;
         }
 
-        List<BattleUnit> SpawnPlayers()
+        List<BattleUnit> SpawnPlayersFromParty()
         {
             PartyManager pm = PartyManager.Ensure();
             if (pm.Party.Count > 0)

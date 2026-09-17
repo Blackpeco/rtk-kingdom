@@ -158,6 +158,7 @@ namespace TsOnline
 
         public void BeginNewGame(string playerName, ElementType element)
         {
+            SaveService.ClearRuntimeStatics();
             BuildDefaultRoster();
             RemoveCreatedLead();
             PartyMember hero = CreatedHero.Make(playerName, element);

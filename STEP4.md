@@ -59,7 +59,7 @@ Top-right of Battle:
 1. In World press **P** (or the top-right button).
 2. Right column: **เข้า** on **ลิโป้** and **หยางซิว** (party becomes 5).
 3. Use **▲ / ▼** on a row — World strip order updates.
-4. **ออก** on one member (cannot drop below 1).
+4. **ออก** on one member (cannot drop below 1). After CharacterCreate the lead shows **หัวหน้า** instead of ออก.
 5. Walk into a monster. Battle left side matches the new lineup (up to 5 cards).
 
 ### 3. Auto Attack / Auto Heal toggles in battle

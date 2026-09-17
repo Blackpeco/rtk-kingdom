@@ -4,7 +4,7 @@ Thai + English. World map is **Step 3** (`STEP3.md`). Party / EXP / AutoBattle a
 
 ## What you can play
 
-Open `Assets/Scenes/Battle.unity` and press **Play**.
+Open `Assets/Scenes/Battle.unity` and press **Play**. Direct Play uses the wired 3v3 below — it does **not** load a CharacterCreate save. World encounters still use the live party.
 
 - Left: Zhao Yun / จูล่ง (Wind), Guan Yu / กวนอู (Wind), Zhuge Liang / ขงเบ้ง (Water)
 - Right: Forest Wolf / หมาป่า (Wind), Mountain Bandit / โจรภูเขา (Fire), Swamp Frog / กบทึง (Water)

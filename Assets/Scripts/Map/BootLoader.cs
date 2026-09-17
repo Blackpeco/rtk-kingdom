@@ -19,9 +19,11 @@ namespace TsOnline
             if (SaveService.Exists())
             {
                 PartyManager.Ensure();
-                SaveService.HydrateIfNeeded();
-                SceneManager.LoadScene(string.IsNullOrEmpty(nextScene) ? "World" : nextScene);
-                return;
+                if (SaveService.TryLoad())
+                {
+                    SceneManager.LoadScene(string.IsNullOrEmpty(nextScene) ? "World" : nextScene);
+                    return;
+                }
             }
 
             SceneManager.LoadScene("CharacterCreate");

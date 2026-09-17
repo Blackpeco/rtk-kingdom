@@ -30,7 +30,13 @@ namespace TsOnline
                 return;
             PartyManager.Ensure();
             if (File.Exists(FilePath))
-                TryLoad();
+            {
+                if (TryLoad())
+                    return;
+                SessionHydrated = false;
+                return;
+            }
+
             SessionHydrated = true;
         }
 
@@ -45,10 +51,16 @@ namespace TsOnline
             try
             {
                 string json = File.ReadAllText(FilePath);
-                GameSave save = JsonUtility.FromJson<GameSave>(json);
-                if (save == null)
+                if (string.IsNullOrWhiteSpace(json))
                 {
-                    Toast("เซฟเสียหาย");
+                    DiscardCorrupt("เซฟว่าง");
+                    return false;
+                }
+
+                GameSave save = JsonUtility.FromJson<GameSave>(json);
+                if (!LooksValid(save))
+                {
+                    DiscardCorrupt("เซฟเสียหาย");
                     return false;
                 }
 
@@ -60,7 +72,7 @@ namespace TsOnline
             catch (System.Exception e)
             {
                 Debug.LogWarning("[Save] Load failed: " + e.Message);
-                Toast("โหลดไม่สำเร็จ");
+                DiscardCorrupt("โหลดไม่สำเร็จ");
                 return false;
             }
         }
@@ -201,18 +213,44 @@ namespace TsOnline
             }
         }
 
-        public static void ResetRuntimeAndCreate()
+        public static void ClearRuntimeStatics()
         {
-            DeleteSave();
-            SessionHydrated = false;
             QuestTracker.Reset();
             InventoryService.Clear();
             AutoBattleController.SavedAutoAttack = false;
             AutoBattleController.SavedAutoHeal = false;
             AutoBattleController.SavedHealThreshold = AutoBattleController.DefaultHealThresholdPercent;
             EncounterContext.ResetSession();
+        }
+
+        public static void ResetRuntimeAndCreate()
+        {
+            DeleteSave();
+            SessionHydrated = false;
+            ClearRuntimeStatics();
             PartyManager.TearDown();
             SceneManager.LoadScene("CharacterCreate");
+        }
+
+        static bool LooksValid(GameSave save)
+        {
+            if (save == null)
+                return false;
+            if (save.roster != null && save.roster.Length > 0)
+                return true;
+            if (save.partyOrder != null && save.partyOrder.Length > 0)
+                return true;
+            if (!string.IsNullOrEmpty(save.playerName))
+                return true;
+            return false;
+        }
+
+        static void DiscardCorrupt(string message)
+        {
+            Debug.LogWarning("[Save] Discarding corrupt save.");
+            DeleteSave();
+            SessionHydrated = false;
+            Toast(string.IsNullOrEmpty(message) ? "เซฟเสียหาย" : message);
         }
 
         static void Toast(string msg)
