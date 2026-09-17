@@ -11,7 +11,8 @@ namespace TsOnline
 {
     /// <summary>
     /// World encounters spawn the PartyManager roster and persist the save.
-    /// Direct Play on Battle.unity uses the inspector / DefaultEncounter 3v3 — it does not hydrate a save and does not write ts_online_save.json.
+    /// Direct Play on Battle.unity uses the inspector / DefaultEncounter 3v3 — it does not hydrate a save,
+    /// does not write ts_online_save.json, and does not set EncounterContext.LastEnd.
     /// </summary>
     public class BattleBootstrap : MonoBehaviour
     {
@@ -36,6 +37,9 @@ namespace TsOnline
         void Start()
         {
             _cameFromWorld = EncounterContext.HasPending;
+            // Sandbox Battle.unity must not leave a leftover LastEnd for the next World play.
+            if (!_cameFromWorld)
+                EncounterContext.LastEnd = BattleEndKind.None;
 
             if (runFormulaSmokeTest)
             {
@@ -76,12 +80,15 @@ namespace TsOnline
             if (_turns == null || _turns.State != BattleState.Ended || _returning)
                 return;
             _returning = true;
-            if (_turns.Escaped)
-                EncounterContext.LastEnd = BattleEndKind.Escape;
-            else if (_turns.PlayerWon)
-                EncounterContext.LastEnd = BattleEndKind.Win;
-            else
-                EncounterContext.LastEnd = BattleEndKind.Lose;
+            if (_cameFromWorld)
+            {
+                if (_turns.Escaped)
+                    EncounterContext.LastEnd = BattleEndKind.Escape;
+                else if (_turns.PlayerWon)
+                    EncounterContext.LastEnd = BattleEndKind.Win;
+                else
+                    EncounterContext.LastEnd = BattleEndKind.Lose;
+            }
 
             PartyManager pm = PartyManager.Ensure();
             pm.WriteBackFromBattle(_turns.PlayerUnits);
