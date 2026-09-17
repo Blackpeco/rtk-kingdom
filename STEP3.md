@@ -8,7 +8,7 @@ Offline only. No networking, gacha, save, or CharacterCreate flow.
 2. **WASD / arrow keys** move the gold player quad.
 3. **Left = เมือง (safe)**. **Right = ป่า**. Walk into a colored wandering monster.
 4. Battle starts with the **same 3 generals** vs that pack. If the party panel (**P**) or ยายเมือง dialog (**E**) is open (`MenuOpen`), the overlap is ignored until you close the UI — wanderers still move.
-5. Win / lose / escape → after ~1.8s return to World, slightly left of the fight (grace 1.6s so you do not instantly re-trigger).
+5. Win / lose / escape → after ~1.8s return to World, slightly left of the fight (grace 1.6s so you do not instantly re-trigger). Standing still when grace ends does not start a new fight; walk into a pack. If P/E was open while overlapping, closing the UI still Stay-retries.
 
 Direct Play on `Battle.unity` still works as the Step 2 3v3 and **does not** return to World (no `EncounterContext`).
 
