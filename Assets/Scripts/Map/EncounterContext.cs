@@ -40,6 +40,18 @@ namespace TsOnline
         {
             ShouldReturnToWorld = false;
         }
+
+        public static void ResetSession()
+        {
+            HasPending = false;
+            ShouldReturnToWorld = false;
+            ReturnScene = "World";
+            ReturnPosition = Vector3.zero;
+            PlayerParty = null;
+            Enemies = null;
+            EncounterName = null;
+            LastEnd = BattleEndKind.None;
+        }
     }
 
     public enum BattleEndKind

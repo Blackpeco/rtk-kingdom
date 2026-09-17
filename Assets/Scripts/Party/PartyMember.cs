@@ -14,10 +14,16 @@ namespace TsOnline
         public int currentHp;
         public int currentSp;
         public bool unlocked = true;
+        public bool isCreatedLead;
 
         public string Id
         {
             get { return definition != null ? definition.id : ""; }
+        }
+
+        public bool IsCreatedLead
+        {
+            get { return isCreatedLead || Id == CreatedHero.Id; }
         }
 
         public string ShortName
@@ -28,6 +34,11 @@ namespace TsOnline
         public string ThaiName
         {
             get { return definition != null ? definition.displayNameThai : ""; }
+        }
+
+        public ElementType Element
+        {
+            get { return definition != null ? definition.element : ElementType.None; }
         }
 
         public UnitStats EffectiveStats

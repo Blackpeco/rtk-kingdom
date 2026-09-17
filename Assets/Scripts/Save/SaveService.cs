@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace TsOnline
 {
@@ -20,7 +21,7 @@ namespace TsOnline
 
         public static bool Exists()
         {
-            return File.Exists(FilePath) || PlayerPrefs.GetInt(PrefsKey, 0) == 1 && File.Exists(FilePath);
+            return File.Exists(FilePath);
         }
 
         public static void HydrateIfNeeded()
@@ -98,8 +99,16 @@ namespace TsOnline
                 inventory = InventoryService.Export(),
                 autoAttack = AutoBattleController.SavedAutoAttack,
                 autoHeal = AutoBattleController.SavedAutoHeal,
-                healThreshold = AutoBattleController.SavedHealThreshold
+                healThreshold = AutoBattleController.SavedHealThreshold,
+                playerName = "",
+                playerElement = 0
             };
+            PartyMember lead = pm.CreatedLead;
+            if (lead != null)
+            {
+                save.playerName = lead.ShortName;
+                save.playerElement = (int)lead.Element;
+            }
 
             if (worldPos.HasValue)
             {
@@ -125,7 +134,7 @@ namespace TsOnline
 
         public static void Apply(GameSave save)
         {
-            PartyManager.Ensure().ApplySave(save.roster, save.partyOrder);
+            PartyManager.Ensure().ApplySave(save.roster, save.partyOrder, save.playerName, save.playerElement);
             InventoryService.Apply(save.inventory);
             QuestTracker.Apply(save.questPhase, save.questWins);
             AutoBattleController.SavedAutoAttack = save.autoAttack;
@@ -170,6 +179,40 @@ namespace TsOnline
         {
             PlayerWorldController ctrl = Object.FindObjectOfType<PlayerWorldController>();
             return ctrl != null ? ctrl.transform : null;
+        }
+
+        public static bool DeleteSave()
+        {
+            try
+            {
+                if (File.Exists(FilePath))
+                    File.Delete(FilePath);
+                PlayerPrefs.DeleteKey(PrefsKey);
+                PlayerPrefs.Save();
+                PendingWorldPos = null;
+                Toast("ลบเซฟแล้ว");
+                return true;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("[Save] Delete failed: " + e.Message);
+                Toast("ลบเซฟไม่สำเร็จ");
+                return false;
+            }
+        }
+
+        public static void ResetRuntimeAndCreate()
+        {
+            DeleteSave();
+            SessionHydrated = false;
+            QuestTracker.Reset();
+            InventoryService.Clear();
+            AutoBattleController.SavedAutoAttack = false;
+            AutoBattleController.SavedAutoHeal = false;
+            AutoBattleController.SavedHealThreshold = AutoBattleController.DefaultHealThresholdPercent;
+            EncounterContext.ResetSession();
+            PartyManager.TearDown();
+            SceneManager.LoadScene("CharacterCreate");
         }
 
         static void Toast(string msg)

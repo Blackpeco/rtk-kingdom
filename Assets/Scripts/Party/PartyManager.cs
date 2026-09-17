@@ -138,6 +138,8 @@ namespace TsOnline
 
         public bool TryRemoveFromParty(PartyMember member)
         {
+            if (member != null && member.IsCreatedLead)
+                return false;
             if (Party.Count <= 1)
                 return false;
             return Party.Remove(member);
@@ -151,6 +153,83 @@ namespace TsOnline
             PartyMember tmp = Party[index];
             Party[index] = Party[dest];
             Party[dest] = tmp;
+            KeepCreatedLeadFirst();
+        }
+
+        public void BeginNewGame(string playerName, ElementType element)
+        {
+            BuildDefaultRoster();
+            RemoveCreatedLead();
+            PartyMember hero = CreatedHero.Make(playerName, element);
+            Roster.Insert(0, hero);
+            Party.Clear();
+            Party.Add(hero);
+        }
+
+        public PartyMember CreatedLead
+        {
+            get { return FindById(CreatedHero.Id); }
+        }
+
+        public static void TearDown()
+        {
+            if (Instance == null)
+                return;
+            Destroy(Instance.gameObject);
+            Instance = null;
+        }
+
+        void RemoveCreatedLead()
+        {
+            for (int i = Roster.Count - 1; i >= 0; i--)
+            {
+                if (Roster[i] != null && Roster[i].IsCreatedLead)
+                    Roster.RemoveAt(i);
+            }
+
+            for (int i = Party.Count - 1; i >= 0; i--)
+            {
+                if (Party[i] != null && Party[i].IsCreatedLead)
+                    Party.RemoveAt(i);
+            }
+        }
+
+        void KeepCreatedLeadFirst()
+        {
+            int idx = -1;
+            for (int i = 0; i < Party.Count; i++)
+            {
+                if (Party[i] != null && Party[i].IsCreatedLead)
+                {
+                    idx = i;
+                    break;
+                }
+            }
+
+            if (idx <= 0)
+                return;
+            PartyMember lead = Party[idx];
+            Party.RemoveAt(idx);
+            Party.Insert(0, lead);
+        }
+
+        public void EnsureCreatedLead(string playerName, ElementType element)
+        {
+            PartyMember existing = FindById(CreatedHero.Id);
+            if (existing == null)
+            {
+                PartyMember hero = CreatedHero.Make(playerName, element);
+                Roster.Insert(0, hero);
+                if (Party.Count == 0)
+                    Party.Add(hero);
+                else if (!InParty(hero))
+                    Party.Insert(0, hero);
+                KeepCreatedLeadFirst();
+                return;
+            }
+
+            CreatedHero.ApplyIdentity(existing, playerName, element);
+            KeepCreatedLeadFirst();
         }
 
         public int AwardWinExp(UnitDefinition[] defeated)
@@ -232,10 +311,40 @@ namespace TsOnline
             return ids;
         }
 
-        public void ApplySave(SavedMember[] saved, string[] order)
+        public void ApplySave(SavedMember[] saved, string[] order, string playerName, int playerElement)
         {
             if (Roster.Count == 0)
                 BuildDefaultRoster();
+
+            string createdName = playerName;
+            ElementType createdEl = playerElement > 0 ? (ElementType)playerElement : ElementType.None;
+            bool hasCreated = false;
+            if (saved != null)
+            {
+                for (int i = 0; i < saved.Length; i++)
+                {
+                    if (saved[i] == null)
+                        continue;
+                    if (saved[i].isCreatedLead || saved[i].id == CreatedHero.Id)
+                    {
+                        hasCreated = true;
+                        if (!string.IsNullOrEmpty(saved[i].displayName))
+                            createdName = saved[i].displayName;
+                        if (saved[i].element > 0)
+                            createdEl = (ElementType)saved[i].element;
+                    }
+                }
+            }
+
+            if (hasCreated || (!string.IsNullOrEmpty(playerName) && playerElement > 0))
+            {
+                if (string.IsNullOrEmpty(createdName))
+                    createdName = "ผู้กล้า";
+                if (createdEl == ElementType.None)
+                    createdEl = ElementType.Fire;
+                EnsureCreatedLead(createdName, createdEl);
+            }
+
             if (saved != null)
             {
                 for (int i = 0; i < saved.Length; i++)
@@ -261,13 +370,21 @@ namespace TsOnline
 
             if (Party.Count == 0)
             {
-                for (int i = 0; i < DefaultPartyIds.Length; i++)
+                PartyMember created = FindById(CreatedHero.Id);
+                if (created != null)
+                    Party.Add(created);
+                else
                 {
-                    PartyMember found = FindById(DefaultPartyIds[i]);
-                    if (found != null && !InParty(found))
-                        Party.Add(found);
+                    for (int i = 0; i < DefaultPartyIds.Length; i++)
+                    {
+                        PartyMember found = FindById(DefaultPartyIds[i]);
+                        if (found != null && !InParty(found))
+                            Party.Add(found);
+                    }
                 }
             }
+
+            KeepCreatedLeadFirst();
         }
 
         static SavedMember ToSaved(PartyMember m)
@@ -288,6 +405,9 @@ namespace TsOnline
             s.bonusDef = m.bonus.def;
             s.bonusAgi = m.bonus.agi;
             s.unlocked = m.unlocked;
+            s.isCreatedLead = m.IsCreatedLead;
+            s.displayName = m.ShortName;
+            s.element = (int)m.Element;
             return s;
         }
 
@@ -300,6 +420,7 @@ namespace TsOnline
             m.currentHp = s.currentHp;
             m.currentSp = s.currentSp;
             m.unlocked = s.unlocked;
+            m.isCreatedLead = m.isCreatedLead || s.isCreatedLead || s.id == CreatedHero.Id;
             m.ClampVitals();
         }
 

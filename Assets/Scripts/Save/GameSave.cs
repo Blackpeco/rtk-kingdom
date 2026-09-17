@@ -17,6 +17,8 @@ namespace TsOnline
         public bool autoAttack;
         public bool autoHeal;
         public float healThreshold = 40f;
+        public string playerName = "";
+        public int playerElement;
     }
 
     [Serializable]
@@ -35,6 +37,9 @@ namespace TsOnline
         public int bonusDef;
         public int bonusAgi;
         public bool unlocked = true;
+        public bool isCreatedLead;
+        public string displayName = "";
+        public int element;
     }
 
     [Serializable]

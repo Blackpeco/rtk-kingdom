@@ -81,5 +81,12 @@ namespace TsOnline
             if (Phase == QuestPhase.Active && ForestWins >= WinsNeeded)
                 Phase = QuestPhase.Ready;
         }
+
+        public static void Reset()
+        {
+            Phase = QuestPhase.None;
+            ForestWins = 0;
+            LastReward = "";
+        }
     }
 }

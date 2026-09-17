@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 namespace TsOnline
 {
-    /// <summary>Optional Boot scene hook — jumps to World. CharacterCreate stays a stub.</summary>
+    /// <summary>Boot: existing save → World; otherwise CharacterCreate.</summary>
     public class BootLoader : MonoBehaviour
     {
         public string nextScene = "World";
@@ -11,14 +11,20 @@ namespace TsOnline
 
         void Start()
         {
-            PartyManager.Ensure();
-            SaveService.HydrateIfNeeded();
             Invoke(nameof(Go), delay);
         }
 
         void Go()
         {
-            SceneManager.LoadScene(nextScene);
+            if (SaveService.Exists())
+            {
+                PartyManager.Ensure();
+                SaveService.HydrateIfNeeded();
+                SceneManager.LoadScene(string.IsNullOrEmpty(nextScene) ? "World" : nextScene);
+                return;
+            }
+
+            SceneManager.LoadScene("CharacterCreate");
         }
     }
 }

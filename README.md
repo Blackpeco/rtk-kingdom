@@ -1,4 +1,4 @@
-# TS Online — Steps 1–5 (offline)
+# TS Online — Steps 1–5 + CharacterCreate (offline)
 
 Single-player Unity scaffold for a TS Online–inspired turn-based game.
 
@@ -7,14 +7,18 @@ Single-player Unity scaffold for a TS Online–inspired turn-based game.
 - **Step 3:** World walk + forest encounter → Battle → return — **[STEP3.md](STEP3.md)**
 - **Step 4:** Party (max 5 of 6 generals), EXP / manual level-up, Auto Attack + Auto Heal — **[STEP4.md](STEP4.md)**
 - **Step 5:** Patoyo mascot, one city quest, JSON save/load — **[STEP5.md](STEP5.md)**
+- **CharacterCreate:** name + element on fresh Boot — **[CHARACTER_CREATE.md](CHARACTER_CREATE.md)**
 
-Out of scope: networking, gacha, CharacterCreate polish, multi-quest journal.
+Out of scope: networking, gacha, multi-quest journal.
 
 ## Open in Unity
 
 1. Install **Unity 2022.3 LTS** or **Unity 6**.
 2. Unity Hub → **Open** → this folder.
-3. After compile: **Tools → TS Online → Run Element Formula Tests**, then Play **`Boot.unity`** (or `World.unity`).
+3. After compile: **Tools → TS Online → Run Element Formula Tests**, then Play **`Boot.unity`**.
+
+No save → CharacterCreate. Existing save → World.  
+**F8** in World deletes the save and returns to create.
 
 2D URP click path: **[Assets/Settings/README_URP.md](Assets/Settings/README_URP.md)**.  
 Missing icons: **Tools → TS Online → Create Default Data Assets**.
@@ -22,7 +26,7 @@ Missing icons: **Tools → TS Online → Create Default Data Assets**.
 ## Verify
 
 **Formulas:** `python3 tools/verify_formulas.py`  
-**World:** pink Patoyo follows; **E** on ยายเมือง; **F5** / **F9** save-load  
-**Battle:** **ปาโต้เยา** heal (2/fight) does not take a party slot
+**Create:** Boot with no save → name + ดิน/น้ำ/ไฟ/ลม → World HUD shows that name  
+**World / Battle:** Patoyo, quest, F5/F9, auto battle — unchanged
 
 Normal attacks use `DamageRequest.NormalAttack`. `BasicStrike` is a None-element skill.

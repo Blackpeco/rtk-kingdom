@@ -15,6 +15,8 @@ namespace TsOnline
                 if (SaveService.TryLoad())
                     SaveService.TryApplyWorldPosition(SaveService.FindPlayer());
             }
+            if (Input.GetKeyDown(KeyCode.F8))
+                SaveService.ResetRuntimeAndCreate();
         }
 
         void OnGUI()
@@ -23,8 +25,13 @@ namespace TsOnline
             var title = new GUIStyle(GUI.skin.label) { fontSize = 18, fontStyle = FontStyle.Bold };
             title.normal.textColor = Color.white;
 
+            PartyMember lead = PartyManager.Ensure().Party.Count > 0 ? PartyManager.Ensure().Party[0] : null;
+            string leadTitle = lead != null
+                ? lead.ShortName + "  " + CreatedHero.Thai(lead.Element)
+                : "World";
+
             GUI.Box(new Rect(16, 12, 640, 118), "", box);
-            GUI.Label(new Rect(28, 16, 616, 26), "World — Step 5", title);
+            GUI.Label(new Rect(28, 16, 616, 26), leadTitle, title);
             GUI.Label(new Rect(28, 42, 616, 28), _hint);
             GUI.Label(new Rect(28, 70, 616, 24), QuestTracker.ObjectiveLine()
                 + "   ·   สมุนไพร ×" + InventoryService.CountOf(InventoryService.HerbId));
@@ -50,11 +57,13 @@ namespace TsOnline
                 if (SaveService.TryLoad())
                     SaveService.TryApplyWorldPosition(SaveService.FindPlayer());
             }
+            if (GUI.Button(new Rect(Screen.width - 240, 90, 224, 28), "เกมใหม่ / ลบเซฟ (F8)"))
+                SaveService.ResetRuntimeAndCreate();
 
             if (!string.IsNullOrEmpty(SaveService.LastMessage)
                 && Time.realtimeSinceStartup - SaveService.LastMessageAt < 2.5f)
             {
-                GUI.Label(new Rect(Screen.width - 240, 90, 224, 22), SaveService.LastMessage);
+                GUI.Label(new Rect(Screen.width - 240, 122, 224, 22), SaveService.LastMessage);
             }
         }
     }

@@ -88,8 +88,10 @@ namespace TsOnline
         {
             var go = new GameObject("Player");
             go.transform.position = new Vector3(-6.2f, 0f, 0f);
+            PartyMember lead = PartyManager.Ensure().Party.Count > 0 ? PartyManager.Ensure().Party[0] : null;
+            Color body = lead != null ? CreatedHero.ColorOf(lead.Element) : new Color(0.95f, 0.82f, 0.28f);
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = MakeQuad(new Color(0.95f, 0.82f, 0.28f), 16);
+            sr.sprite = MakeQuad(body, 16);
             sr.sortingOrder = 5;
             var rb = go.AddComponent<Rigidbody2D>();
             rb.gravityScale = 0f;
@@ -100,8 +102,7 @@ namespace TsOnline
             label.transform.SetParent(go.transform, false);
             label.transform.localPosition = new Vector3(0f, 0.7f, 0f);
             var tm = label.AddComponent<TextMesh>();
-            PartyMember lead = PartyManager.Ensure().Party.Count > 0 ? PartyManager.Ensure().Party[0] : null;
-            tm.text = lead != null && !string.IsNullOrEmpty(lead.ThaiName) ? lead.ThaiName : "จูล่ง";
+            tm.text = lead != null && !string.IsNullOrEmpty(lead.ShortName) ? lead.ShortName : "จูล่ง";
             tm.characterSize = 0.16f;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.fontSize = 24;

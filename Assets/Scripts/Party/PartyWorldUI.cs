@@ -51,8 +51,11 @@ namespace TsOnline
                     continue;
                 UnitStats s = m.EffectiveStats;
                 string pts = m.unspentPoints > 0 ? "  +" + m.unspentPoints + " pts" : "";
+                string names = m.IsCreatedLead
+                    ? m.ShortName + "  " + CreatedHero.Thai(m.Element)
+                    : m.ShortName + " / " + m.ThaiName;
                 GUI.Label(new Rect(24, y, 404, 20),
-                    (i + 1) + ". " + m.ShortName + " / " + m.ThaiName
+                    (i + 1) + ". " + names
                     + "  Lv" + m.level
                     + "  HP " + m.currentHp + "/" + s.hp
                     + "  SP " + m.currentSp + "/" + s.sp
@@ -163,7 +166,9 @@ namespace TsOnline
         {
             if (m == null)
                 return "-";
-            string s = m.ShortName + " / " + m.ThaiName + "  Lv" + m.level;
+            string s = m.IsCreatedLead
+                ? m.ShortName + "  " + CreatedHero.Thai(m.Element) + "  Lv" + m.level
+                : m.ShortName + " / " + m.ThaiName + "  Lv" + m.level;
             if (showVitals)
             {
                 UnitStats st = m.EffectiveStats;
