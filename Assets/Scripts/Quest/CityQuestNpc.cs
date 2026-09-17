@@ -76,16 +76,19 @@ namespace TsOnline
             if (!_talking)
                 return;
 
-            float w = 560f;
+            float w = Mathf.Min(560f, Mathf.Max(280f, Screen.width - 40f));
             float h = 188f;
-            var box = new Rect((Screen.width - w) * 0.5f, Screen.height - h - 24, w, h);
+            var box = new Rect((Screen.width - w) * 0.5f, Mathf.Max(12f, Screen.height - h - 24), w, h);
             UiTheme.DrawPanel(box);
             GUI.Label(new Rect(box.x + 16, box.y + 10, w - 32, 28), "ยายเมือง", UiTheme.Title());
             GUI.Label(new Rect(box.x + 16, box.y + 44, w - 32, 72), _line, UiTheme.Body());
 
+            float inner = w - 32f;
+            float acceptW = Mathf.Min(168f, inner * 0.48f);
+            float closeW = Mathf.Min(124f, inner * 0.40f);
             if (QuestTracker.Phase == QuestPhase.None)
             {
-                if (GUI.Button(new Rect(box.x + 16, box.y + h - 52, 168, 40), "รับเควสต์", UiTheme.Button()))
+                if (GUI.Button(new Rect(box.x + 16, box.y + h - 52, acceptW, 40), "รับเควสต์", UiTheme.Button()))
                 {
                     QuestTracker.Accept();
                     _line = "ป่าด้านขวาไม่สงบ… ชนะการรบในป่า 2 ครั้ง แล้วกลับมาหาฉัน";
@@ -94,7 +97,7 @@ namespace TsOnline
             }
             else if (QuestTracker.Phase == QuestPhase.Ready)
             {
-                if (GUI.Button(new Rect(box.x + 16, box.y + h - 52, 168, 40), "ส่งเควสต์", UiTheme.Button()))
+                if (GUI.Button(new Rect(box.x + 16, box.y + h - 52, acceptW, 40), "ส่งเควสต์", UiTheme.Button()))
                 {
                     string msg;
                     if (QuestTracker.TryComplete(out msg))
@@ -105,7 +108,7 @@ namespace TsOnline
                 }
             }
 
-            if (GUI.Button(new Rect(box.x + w - 140, box.y + h - 52, 124, 40), "ปิด", UiTheme.Button()))
+            if (GUI.Button(new Rect(box.x + w - 16 - closeW, box.y + h - 52, closeW, 40), "ปิด", UiTheme.Button()))
             {
                 _talking = false;
                 PlayerWorldController.DialogueOpen = false;

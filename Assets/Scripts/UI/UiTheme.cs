@@ -5,8 +5,8 @@ namespace TsOnline
     /// <summary>Shared OnGUI readability helpers. Visual only — no gameplay state.</summary>
     public static class UiTheme
     {
-        public const float WorldHudHeight = 168f;
-        public const float WorldHudBottom = 188f;
+        public const float WorldHudHeight = 188f;
+        public const float WorldHudBottom = 208f;
 
         public static readonly Color Panel = new Color(0.07f, 0.08f, 0.10f, 0.92f);
         public static readonly Color PanelWarm = new Color(0.14f, 0.09f, 0.08f, 0.92f);
@@ -106,6 +106,27 @@ namespace TsOnline
         public static Color Element(ElementType e)
         {
             return CreatedHero.ColorOf(e);
+        }
+
+        /// <summary>Single-line ellipsis so long names do not spill into the next column.</summary>
+        public static string Ellipsis(string text, GUIStyle style, float maxWidth)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "";
+            if (style == null || maxWidth <= 0f)
+                return text;
+            if (style.CalcSize(new GUIContent(text)).x <= maxWidth)
+                return text;
+
+            const string dots = "…";
+            for (int i = text.Length - 1; i >= 1; i--)
+            {
+                string cut = text.Substring(0, i) + dots;
+                if (style.CalcSize(new GUIContent(cut)).x <= maxWidth)
+                    return cut;
+            }
+
+            return dots;
         }
 
         static void Ensure()
