@@ -31,7 +31,11 @@ namespace TsOnline
             ShouldReturnToWorld = true;
         }
 
-        /// <summary>World finished applying the return spawn. Clears both pending flags so a later Play on Battle.unity is a sandbox 3v3.</summary>
+        /// <summary>
+        /// World finished applying the return spawn. Clears pending/return flags so a later Play on
+        /// Battle.unity is a sandbox 3v3. <see cref="LastEnd"/> stays for World HUD after a real return;
+        /// <see cref="ResetSession"/> and sandbox Battle clear it so leftovers cannot fake the next World load.
+        /// </summary>
         public static void MarkReturned()
         {
             HasPending = false;

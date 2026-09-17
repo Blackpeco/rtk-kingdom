@@ -35,7 +35,8 @@ namespace TsOnline
             gameObject.AddComponent<WorldHUD>();
             gameObject.AddComponent<PartyWorldUI>();
 
-            if (EncounterContext.ShouldReturnToWorld || EncounterContext.LastEnd != BattleEndKind.None)
+            // Real World→Battle handoff only. A leftover LastEnd (or sandbox Battle win) must not fake a return+save.
+            if (EncounterContext.ShouldReturnToWorld)
             {
                 Vector3 back = EncounterContext.ReturnPosition + Vector3.left * 1.25f;
                 player.transform.position = back;

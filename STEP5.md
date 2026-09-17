@@ -41,7 +41,7 @@ Persists: roster ids, party order, level / EXP / unspent / bonus stats / HP / SP
 | Enter Battle from World | Position + party |
 | Leave Battle → World | Party write-back, EXP, quest progress, position |
 | Quest accept / complete | Party + quest + bag |
-| Direct Play `Battle.unity` | Never writes the player save (test 3v3 only) |
+| Direct Play `Battle.unity` | Never writes the player save and never sets `LastEnd` (test 3v3 only) |
 
 **Boot** loads only if the save file exists **and** `TryLoad` succeeds; a missing or corrupt file opens CharacterCreate (the bad file is deleted). Playing `World.unity` directly still calls `HydrateIfNeeded` once per session (does **not** reload over in-memory state when you return from Battle).
 
