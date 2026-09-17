@@ -2,6 +2,15 @@
 
 Single-player Unity scaffold for a TS Online–inspired turn-based game.
 
+## Repository
+
+Permanent Origin repo: **[bankleafa/rtk-online](https://cursor.com/codebase/bankleafa/rtk-online)**
+
+- Clone: `https://origin.cursor.com/bankleafa/rtk-online.git`
+- Browse: `https://cursor.com/codebase/bankleafa/rtk-online`
+
+The earlier slug `tmp-31ac7ef40c42fe9f` is **legacy**. Use `rtk-online` for new clones and pushes.
+
 - **Step 1:** Element + damage formulas — **[STEP1.md](STEP1.md)**
 - **Step 2:** 3v3 Battle test — **[STEP2.md](STEP2.md)**
 - **Step 3:** World walk + forest encounter → Battle → return — **[STEP3.md](STEP3.md)**
