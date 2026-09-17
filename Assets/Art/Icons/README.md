@@ -7,5 +7,7 @@ Four 32×32 PNG placeholders, imported as Sprites (GUIDs unchanged from the orig
 - `fire.png` — red + flame triangle (ไฟ)
 - `wind.png` — green + chevrons (ลม)
 
+Second polish: denser inner glyphs; GUIDs still preserved.
+
 Assigned on each `ElementDefinition` under `Assets/Data/Elements`.  
 Regenerate: `python3 tools/generate_placeholders.py`

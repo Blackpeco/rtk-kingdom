@@ -116,10 +116,16 @@ namespace TsOnline
                 if (screen.z < 0f)
                     continue;
                 float y = Screen.height - screen.y;
-                float w = p.emphasis ? 280f : 200f;
-                float h = p.emphasis ? 48f : 38f;
+                bool advantage = p.emphasis && p.text.IndexOf("ข่มธาตุ") >= 0;
+                bool resist = p.emphasis && p.text.IndexOf("ธาตุต้าน") >= 0;
+                float w = p.emphasis ? 300f : 200f;
+                float h = p.emphasis ? 52f : 38f;
                 var rect = new Rect(screen.x - w * 0.5f, y - h * 0.5f, w, h);
-                if (p.emphasis)
+                if (advantage)
+                    UiTheme.DrawFramedPanel(rect, new Color(0.28f, 0.20f, 0.06f, 0.92f), UiTheme.Advantage);
+                else if (resist)
+                    UiTheme.DrawFramedPanel(rect, new Color(0.14f, 0.16f, 0.20f, 0.92f), UiTheme.Resist);
+                else if (p.emphasis)
                     UiTheme.DrawFill(rect, new Color(0f, 0f, 0f, 0.62f));
                 var style = new GUIStyle(GUI.skin.label)
                 {
@@ -139,19 +145,19 @@ namespace TsOnline
             if (_auto == null)
                 return;
             float x = Screen.width - 320f;
-            UiTheme.DrawPanel(new Rect(x, 8, 308, 132));
-            GUI.Label(new Rect(x + 12, 12, 284, 26), "Auto Battle", UiTheme.Title());
+            UiTheme.DrawFramedPanel(new Rect(x, 8, 308, 136), UiTheme.Panel, UiTheme.Accent);
+            GUI.Label(new Rect(x + 16, 12, 280, 26), "Auto Battle", UiTheme.Title());
             var toggle = new GUIStyle(GUI.skin.toggle) { fontSize = 16 };
             toggle.normal.textColor = Color.white;
-            toggle.onNormal.textColor = Color.white;
-            _auto.AutoAttack = GUI.Toggle(new Rect(x + 14, 44, 140, 26), _auto.AutoAttack, "Auto Attack", toggle);
+            toggle.onNormal.textColor = UiTheme.LeadGold;
+            _auto.AutoAttack = GUI.Toggle(new Rect(x + 16, 44, 140, 26), _auto.AutoAttack, "Auto Attack", toggle);
             _auto.AutoHeal = GUI.Toggle(new Rect(x + 164, 44, 130, 26), _auto.AutoHeal, "Auto Heal", toggle);
-            GUI.Label(new Rect(x + 14, 74, 170, 26), "Heal ถ้า HP < " + Mathf.RoundToInt(_auto.HealThresholdPercent) + "%", UiTheme.Body());
+            GUI.Label(new Rect(x + 16, 74, 170, 26), "Heal ถ้า HP < " + Mathf.RoundToInt(_auto.HealThresholdPercent) + "%", UiTheme.Body());
             if (GUI.Button(new Rect(x + 196, 72, 44, 30), "−", UiTheme.Button()))
                 _auto.HealThresholdPercent = Mathf.Max(10f, _auto.HealThresholdPercent - 10f);
             if (GUI.Button(new Rect(x + 246, 72, 44, 30), "+", UiTheme.Button()))
                 _auto.HealThresholdPercent = Mathf.Min(100f, _auto.HealThresholdPercent + 10f);
-            GUI.Label(new Rect(x + 14, 104, 284, 26),
+            GUI.Label(new Rect(x + 16, 104, 280, 26),
                 "ปาโต้เยา รักษาเหลือ " + PatoyoHelper.ChargesLeft + "/" + PatoyoHelper.MaxCharges
                 + "   สมุนไพร ×" + InventoryService.CountOf(InventoryService.HerbId),
                 UiTheme.Hint());
@@ -163,8 +169,8 @@ namespace TsOnline
             float w = Mathf.Min(680f, Screen.width - 40f);
             float h = 320f;
             var box = new Rect((Screen.width - w) * 0.5f, Screen.height * 0.5f - h * 0.5f, w, h);
-            UiTheme.DrawPanel(box);
-            GUI.Label(new Rect(box.x + 16, box.y + 10, w - 32, 28),
+            UiTheme.DrawFramedPanel(box, UiTheme.Panel, UiTheme.LeadGold);
+            GUI.Label(new Rect(box.x + 18, box.y + 10, w - 36, 28),
                 string.IsNullOrEmpty(pm.LastRewardSummary) ? "เลเวลอัพ — แจกแต้มสถานะ" : pm.LastRewardSummary,
                 UiTheme.Title());
 
@@ -192,9 +198,15 @@ namespace TsOnline
                 m.ShortName + " / " + m.ThaiName + "  Lv " + m.level
                 + "  EXP " + m.exp + "/" + ExpLevelSystem.ExpToNext(m.level)
                 + "  แต้ม " + m.unspentPoints, UiTheme.Body());
-            GUI.Label(new Rect(box.x + 16, box.y + 112, w - 32, 24),
-                "HP " + m.currentHp + "/" + s.hp + "   SP " + m.currentSp + "/" + s.sp
-                + "   ATK " + s.atk + "  INT " + s.intel + "  DEF " + s.def + "  AGI " + s.agi,
+            var barLabel = new GUIStyle(UiTheme.Tiny()) { alignment = TextAnchor.MiddleCenter };
+            UiTheme.DrawBar(new Rect(box.x + 16, box.y + 112, 220, 18),
+                m.currentHp, s.hp, UiTheme.Hp, UiTheme.HpBack,
+                "HP " + m.currentHp + "/" + s.hp, barLabel);
+            UiTheme.DrawBar(new Rect(box.x + 244, box.y + 112, 200, 18),
+                m.currentSp, Mathf.Max(1, s.sp), UiTheme.Sp, UiTheme.SpBack,
+                "SP " + m.currentSp + "/" + s.sp, barLabel);
+            GUI.Label(new Rect(box.x + 454, box.y + 110, Mathf.Max(80f, w - 470), 22),
+                "ATK " + s.atk + "  INT " + s.intel + "  DEF " + s.def + "  AGI " + s.agi,
                 UiTheme.Body());
 
             if (m.unspentPoints > 0)
@@ -265,14 +277,22 @@ namespace TsOnline
             _logText = MakeText(root.transform, "Log", 14, TextAnchor.LowerLeft, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 132), new Vector2(1000, 100));
             _logText.color = new Color(0.88f, 0.90f, 0.93f);
 
-            _partyHud = MakePanel(root.transform, "PartyHud", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(168, 10), new Vector2(312, 400));
-            _partyHud.GetComponent<Image>().color = new Color(0.06f, 0.10f, 0.14f, 0.78f);
-            _enemyHud = MakePanel(root.transform, "EnemyHud", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-168, 10), new Vector2(312, 400));
-            _enemyHud.GetComponent<Image>().color = new Color(0.16f, 0.07f, 0.07f, 0.78f);
+            _partyHud = MakePanel(root.transform, "PartyHud", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(168, 10), new Vector2(320, 400));
+            _partyHud.GetComponent<Image>().color = new Color(0.05f, 0.09f, 0.13f, 0.88f);
+            AddChrome(_partyHud, new Color(0.40f, 0.62f, 0.86f, 0.85f));
+            _enemyHud = MakePanel(root.transform, "EnemyHud", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-168, 10), new Vector2(320, 400));
+            _enemyHud.GetComponent<Image>().color = new Color(0.16f, 0.06f, 0.06f, 0.88f);
+            AddChrome(_enemyHud, new Color(0.86f, 0.42f, 0.36f, 0.85f));
 
-            _commands = MakePanel(root.transform, "Commands", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 58), new Vector2(1080, 88));
-            _skills = MakePanel(root.transform, "Skills", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 58), new Vector2(1140, 88));
-            _targets = MakePanel(root.transform, "Targets", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 58), new Vector2(1140, 88));
+            _commands = MakePanel(root.transform, "Commands", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 62), new Vector2(1100, 100));
+            _commands.GetComponent<Image>().color = new Color(0.06f, 0.07f, 0.09f, 0.88f);
+            AddChrome(_commands, new Color(0.82f, 0.70f, 0.32f, 0.95f));
+            _skills = MakePanel(root.transform, "Skills", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 62), new Vector2(1160, 100));
+            _skills.GetComponent<Image>().color = new Color(0.06f, 0.07f, 0.09f, 0.88f);
+            AddChrome(_skills, new Color(0.32f, 0.52f, 0.82f, 0.95f));
+            _targets = MakePanel(root.transform, "Targets", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 62), new Vector2(1160, 100));
+            _targets.GetComponent<Image>().color = new Color(0.06f, 0.07f, 0.09f, 0.88f);
+            AddChrome(_targets, new Color(0.82f, 0.70f, 0.32f, 0.95f));
         }
 
         void Rebuild()
@@ -368,23 +388,30 @@ namespace TsOnline
             float gap = n >= 5 ? 8f : 12f;
             float total = n * cardH + Mathf.Max(0, n - 1) * gap;
             var rootRt = root.GetComponent<RectTransform>();
-            rootRt.sizeDelta = new Vector2(312, Mathf.Max(400f, total + 44f));
+            rootRt.sizeDelta = new Vector2(320, Mathf.Max(400f, total + 44f));
             float y = total * 0.5f - cardH * 0.5f - 8f;
             for (int i = 0; i < units.Count; i++)
             {
                 BattleUnit unit = units[i];
-                var card = MakePanel(root, "Card" + i, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, y), new Vector2(292, cardH));
+                var card = MakePanel(root, "Card" + i, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, y), new Vector2(300, cardH));
                 var img = card.GetComponent<Image>();
-                img.color = unit != null && unit == _turns.CurrentActor
-                    ? new Color(0.20f, 0.28f, 0.16f, 0.95f)
+                bool current = unit != null && unit == _turns.CurrentActor;
+                img.color = current
+                    ? new Color(0.22f, 0.30f, 0.16f, 0.96f)
                     : playerSide
-                        ? new Color(0.08f, 0.11f, 0.15f, 0.90f)
-                        : new Color(0.16f, 0.08f, 0.08f, 0.90f);
+                        ? new Color(0.07f, 0.10f, 0.14f, 0.94f)
+                        : new Color(0.16f, 0.07f, 0.07f, 0.94f);
+                if (current)
+                    AddChrome(card, UiTheme.LeadGold);
 
                 if (unit != null)
                 {
-                    var chip = MakePanel(card, "El", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18, -16), new Vector2(16, 16));
+                    var stripe = MakePanel(card, "Stripe", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+                        new Vector2(6, 0), new Vector2(6, cardH - 10f));
+                    stripe.GetComponent<Image>().color = unit.ElementColor();
+                    var chip = MakePanel(card, "El", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28, -16), new Vector2(16, 16));
                     chip.GetComponent<Image>().color = unit.ElementColor();
+                    chip.localRotation = Quaternion.Euler(0f, 0f, 45f);
                 }
 
                 string lv = "";
@@ -396,7 +423,7 @@ namespace TsOnline
                 }
 
                 string title = unit == null ? "-" : unit.ShortName + "  " + ThaiElement(unit.Element) + lv;
-                var name = MakeText(card, "N", 16, TextAnchor.MiddleLeft, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(12, -16), new Vector2(250, 24));
+                var name = MakeText(card, "N", 16, TextAnchor.MiddleLeft, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(18, -16), new Vector2(250, 24));
                 name.text = title;
                 name.color = unit != null && unit.IsAlive ? Color.white : new Color(1f, 0.4f, 0.4f);
 
@@ -420,12 +447,22 @@ namespace TsOnline
 
         void MakeBar(Transform parent, string id, Vector2 pos, int current, int max, Color fill, string label, float height)
         {
-            var bg = MakePanel((RectTransform)parent, id, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), pos, new Vector2(260, height));
-            bg.GetComponent<Image>().color = id == "HP" ? UiTheme.HpBack : UiTheme.SpBack;
+            var bg = MakePanel((RectTransform)parent, id, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), pos, new Vector2(268, height));
+            bg.GetComponent<Image>().color = new Color(0.02f, 0.02f, 0.03f, 0.95f);
+            var inset = MakePanel(bg, "Back", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(264, height - 4f));
+            inset.GetComponent<Image>().color = id == "HP" ? UiTheme.HpBack : UiTheme.SpBack;
             float pct = max <= 0 ? 0f : Mathf.Clamp01(current / (float)max);
-            var bar = MakePanel(bg, "Fill", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2((260f * pct) * 0.5f, 0), new Vector2(260f * pct, height));
+            float fillW = 260f * pct;
+            var bar = MakePanel(inset, "Fill", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(fillW * 0.5f, 0), new Vector2(fillW, height - 6f));
             bar.GetComponent<Image>().color = fill;
-            var t = MakeText(bg, "L", 12, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(260, height));
+            if (fillW > 4f)
+            {
+                var shine = MakePanel(bar, "Shine", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+                    new Vector2(0, -2), new Vector2(fillW, Mathf.Max(3f, (height - 6f) * 0.38f)));
+                shine.GetComponent<Image>().color = Color.Lerp(fill, Color.white, 0.38f);
+                shine.GetComponent<Image>().raycastTarget = false;
+            }
+            var t = MakeText(bg, "L", 12, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(268, height));
             t.text = label;
             t.fontStyle = FontStyle.Bold;
         }
@@ -474,7 +511,7 @@ namespace TsOnline
                 Button b = MakeButton(parent, buttons[i].Label, buttons[i].Color, buttons[i].Click);
                 var rt = b.GetComponent<RectTransform>();
                 rt.anchoredPosition = new Vector2(x, 0);
-                rt.sizeDelta = new Vector2(width, 60);
+                rt.sizeDelta = new Vector2(width, 62);
                 x += width + gap;
             }
         }
@@ -484,15 +521,18 @@ namespace TsOnline
             var go = new GameObject(label, typeof(RectTransform), typeof(Image), typeof(Button));
             go.transform.SetParent(parent, false);
             var rt = go.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(148, 60);
-            go.GetComponent<Image>().color = color;
+            rt.sizeDelta = new Vector2(148, 62);
+            go.GetComponent<Image>().color = color * 0.55f;
+            var face = MakePanel(rt, "Face", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(142, 56));
+            face.GetComponent<Image>().color = color;
+            face.GetComponent<Image>().raycastTarget = false;
             var btn = go.GetComponent<Button>();
             var colors = btn.colors;
             colors.highlightedColor = color * 1.15f;
             colors.pressedColor = color * 0.8f;
             btn.colors = colors;
             btn.onClick.AddListener(click);
-            var text = MakeText(go.transform, "T", 17, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(148, 60));
+            var text = MakeText(go.transform, "T", 17, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(148, 62));
             text.text = label;
             text.fontStyle = FontStyle.Bold;
             text.raycastTarget = false;
@@ -533,10 +573,44 @@ namespace TsOnline
             return rt;
         }
 
+        static void AddChrome(RectTransform parent, Color accent)
+        {
+            if (parent == null)
+                return;
+            var top = new GameObject("_ChromeTop", typeof(RectTransform), typeof(Image));
+            top.transform.SetParent(parent, false);
+            var topRt = top.GetComponent<RectTransform>();
+            topRt.anchorMin = new Vector2(0f, 1f);
+            topRt.anchorMax = new Vector2(1f, 1f);
+            topRt.pivot = new Vector2(0.5f, 1f);
+            topRt.anchoredPosition = Vector2.zero;
+            topRt.sizeDelta = new Vector2(0f, 4f);
+            var topImg = top.GetComponent<Image>();
+            topImg.color = accent;
+            topImg.raycastTarget = false;
+
+            var side = new GameObject("_ChromeSide", typeof(RectTransform), typeof(Image));
+            side.transform.SetParent(parent, false);
+            var sideRt = side.GetComponent<RectTransform>();
+            sideRt.anchorMin = new Vector2(0f, 0f);
+            sideRt.anchorMax = new Vector2(0f, 1f);
+            sideRt.pivot = new Vector2(0f, 0.5f);
+            sideRt.anchoredPosition = Vector2.zero;
+            sideRt.sizeDelta = new Vector2(4f, 0f);
+            var sideImg = side.GetComponent<Image>();
+            sideImg.color = accent;
+            sideImg.raycastTarget = false;
+        }
+
         static void ClearKids(Transform t)
         {
             for (int i = t.childCount - 1; i >= 0; i--)
-                Destroy(t.GetChild(i).gameObject);
+            {
+                Transform c = t.GetChild(i);
+                if (c.name.StartsWith("_Chrome"))
+                    continue;
+                Destroy(c.gameObject);
+            }
         }
 
         static void EnsureEventSystem()

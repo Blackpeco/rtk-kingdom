@@ -93,8 +93,9 @@ namespace TsOnline
             PartyMember lead = PartyManager.Ensure().Party.Count > 0 ? PartyManager.Ensure().Party[0] : null;
             Color body = lead != null ? CreatedHero.ColorOf(lead.Element) : new Color(0.95f, 0.82f, 0.28f);
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = WorldArt.MakeShape(body, 24, WorldArt.Shape.Diamond);
+            sr.sprite = WorldArt.MakeShape(body, 26, WorldArt.Shape.Diamond, true, WorldArt.ActorMark.Lead);
             sr.sortingOrder = 5;
+            WorldArt.AttachShadow(go.transform, 5, 1.25f);
             var rb = go.AddComponent<Rigidbody2D>();
             rb.gravityScale = 0f;
             var col = go.AddComponent<CircleCollider2D>();
@@ -102,9 +103,9 @@ namespace TsOnline
             go.AddComponent<PlayerWorldController>();
             string name = lead != null && !string.IsNullOrEmpty(lead.ShortName) ? lead.ShortName : "จูล่ง";
             string el = lead != null ? CreatedHero.Thai(lead.Element) : "";
-            WorldArt.MakeLabel(go.transform, name, new Vector3(0f, 0.78f, 0f), Color.white, 0.15f, 26);
+            WorldArt.MakeLabel(go.transform, name, new Vector3(0f, 0.82f, 0f), Color.white, 0.15f, 26);
             if (!string.IsNullOrEmpty(el))
-                WorldArt.MakeLabel(go.transform, "หัวหน้า · " + el, new Vector3(0f, 0.54f, 0f),
+                WorldArt.MakeLabel(go.transform, "หัวหน้า · " + el, new Vector3(0f, 0.56f, 0f),
                     Color.Lerp(body, Color.white, 0.4f), 0.11f, 22);
             return go;
         }
@@ -112,20 +113,22 @@ namespace TsOnline
         void BuildForestEncounters()
         {
             SpawnWanderer("Wolf", "หมาป่า", new Vector3(4.4f, 1.6f, 0f), new Color(0.34f, 0.86f, 0.48f),
-                WorldArt.Shape.Diamond, new[] { forestWolf, forestWolf });
+                WorldArt.Shape.Diamond, WorldArt.ActorMark.Wolf, new[] { forestWolf, forestWolf });
             SpawnWanderer("Bandit", "โจร", new Vector3(6.2f, -0.4f, 0f), new Color(0.92f, 0.28f, 0.18f),
-                WorldArt.Shape.Square, new[] { mountainBandit, swampFrog });
+                WorldArt.Shape.Square, WorldArt.ActorMark.Bandit, new[] { mountainBandit, swampFrog });
             SpawnWanderer("Frog", "กบ", new Vector3(5.0f, -2.0f, 0f), new Color(0.18f, 0.58f, 0.92f),
-                WorldArt.Shape.Circle, new[] { swampFrog, forestWolf, mountainBandit });
+                WorldArt.Shape.Circle, WorldArt.ActorMark.Frog, new[] { swampFrog, forestWolf, mountainBandit });
         }
 
-        void SpawnWanderer(string id, string thai, Vector3 pos, Color color, WorldArt.Shape shape, UnitDefinition[] pack)
+        void SpawnWanderer(string id, string thai, Vector3 pos, Color color, WorldArt.Shape shape,
+            WorldArt.ActorMark mark, UnitDefinition[] pack)
         {
             var go = new GameObject("Encounter_" + id);
             go.transform.position = pos;
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = WorldArt.MakeShape(color, 20, shape);
+            sr.sprite = WorldArt.MakeShape(color, 22, shape, true, mark);
             sr.sortingOrder = 4;
+            WorldArt.AttachShadow(go.transform, 4, 1.05f);
             var col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
             col.radius = 0.45f;
@@ -135,35 +138,47 @@ namespace TsOnline
             var wander = go.AddComponent<WanderingMonster>();
             wander.range = 0.85f;
             wander.speed = 0.9f;
-            WorldArt.MakeLabel(go.transform, thai, new Vector3(0f, 0.62f, 0f), Color.Lerp(color, Color.white, 0.45f), 0.12f, 22);
+            WorldArt.MakeLabel(go.transform, thai, new Vector3(0f, 0.66f, 0f), Color.Lerp(color, Color.white, 0.45f), 0.12f, 22);
         }
 
         void BuildGround()
         {
-            CreateGround("CityGround", new Vector3(-5.5f, 0f, 1f), new Vector3(11f, 9f, 1f), true, 0);
-            CreateGround("ForestGround", new Vector3(5.2f, 0f, 1f), new Vector3(11f, 9f, 1f), false, 0);
-            var road = new GameObject("Road");
-            road.transform.position = new Vector3(-0.2f, 0f, 1f);
-            road.transform.localScale = new Vector3(2.4f, 2.6f, 1f);
-            var roadSr = road.AddComponent<SpriteRenderer>();
-            roadSr.sprite = WorldArt.MakeQuad(new Color(0.58f, 0.44f, 0.28f), 16);
-            roadSr.sortingOrder = 1;
+            Sprite city = WorldArt.MakeGround(true);
+            Sprite forest = WorldArt.MakeGround(false);
+            Sprite road = WorldArt.MakeRoad();
+            FillTiles("CityGround", -11f, 0f, -4.5f, 4.5f, city, 0);
+            FillTiles("ForestGround", 0f, 11f, -4.5f, 4.5f, forest, 0);
+            FillTiles("Road", -8f, 8f, -0.8f, 0.8f, road, 1);
+            PlaceStrip("CityBorder", new Vector3(-0.55f, 0f, 1f), new Vector3(0.22f, 9f, 1f),
+                new Color(0.38f, 0.34f, 0.26f), 2);
+            PlaceStrip("ForestBorder", new Vector3(0.55f, 0f, 1f), new Vector3(0.22f, 9f, 1f),
+                new Color(0.10f, 0.28f, 0.12f), 2);
         }
 
         void BuildDecor()
         {
-            PlaceDecor("HouseA", new Vector3(-8.4f, 2.8f, 0f), new Vector3(1.5f, 1.7f, 1f),
-                new Color(0.52f, 0.36f, 0.30f), WorldArt.Shape.Square, 2);
-            PlaceDecor("HouseB", new Vector3(-8.6f, -2.2f, 0f), new Vector3(1.3f, 1.5f, 1f),
-                new Color(0.40f, 0.38f, 0.44f), WorldArt.Shape.Square, 2);
+            PlaceSprite("HouseA", new Vector3(-8.4f, 2.8f, 0f), 1.7f,
+                WorldArt.MakeHouse(new Color(0.58f, 0.38f, 0.30f)), 2);
+            PlaceSprite("HouseB", new Vector3(-8.6f, -2.2f, 0f), 1.5f,
+                WorldArt.MakeHouse(new Color(0.42f, 0.40f, 0.48f)), 2);
+            PlaceSprite("HouseC", new Vector3(-5.2f, -3.1f, 0f), 1.25f,
+                WorldArt.MakeHouse(new Color(0.50f, 0.34f, 0.26f)), 2);
             PlaceDecor("Well", new Vector3(-4.0f, 2.2f, 0f), new Vector3(0.7f, 0.7f, 1f),
                 new Color(0.42f, 0.46f, 0.52f), WorldArt.Shape.Circle, 2);
-            PlaceDecor("TreeA", new Vector3(8.6f, 2.9f, 0f), new Vector3(1.3f, 1.6f, 1f),
-                new Color(0.08f, 0.28f, 0.10f), WorldArt.Shape.Triangle, 2);
-            PlaceDecor("TreeB", new Vector3(8.8f, -2.6f, 0f), new Vector3(1.2f, 1.5f, 1f),
-                new Color(0.10f, 0.32f, 0.12f), WorldArt.Shape.Triangle, 2);
-            PlaceDecor("TreeC", new Vector3(3.4f, 3.1f, 0f), new Vector3(1.0f, 1.3f, 1f),
-                new Color(0.07f, 0.24f, 0.10f), WorldArt.Shape.Triangle, 2);
+            PlaceSprite("TreeA", new Vector3(8.6f, 2.9f, 0f), 1.7f,
+                WorldArt.MakeTree(new Color(0.10f, 0.32f, 0.12f)), 2);
+            PlaceSprite("TreeB", new Vector3(8.8f, -2.6f, 0f), 1.55f,
+                WorldArt.MakeTree(new Color(0.12f, 0.36f, 0.14f)), 2);
+            PlaceSprite("TreeC", new Vector3(3.4f, 3.1f, 0f), 1.35f,
+                WorldArt.MakeTree(new Color(0.09f, 0.28f, 0.11f)), 2);
+            PlaceSprite("TreeD", new Vector3(9.4f, 0.6f, 0f), 1.4f,
+                WorldArt.MakeTree(new Color(0.08f, 0.26f, 0.10f)), 2);
+            PlaceSprite("TreeE", new Vector3(7.4f, -3.3f, 0f), 1.3f,
+                WorldArt.MakeTree(new Color(0.11f, 0.30f, 0.12f)), 2);
+            PlaceDecor("PostN", new Vector3(-1.35f, 1.7f, 0f), new Vector3(0.22f, 0.55f, 1f),
+                new Color(0.36f, 0.26f, 0.16f), WorldArt.Shape.Square, 2);
+            PlaceDecor("PostS", new Vector3(-1.35f, -1.7f, 0f), new Vector3(0.22f, 0.55f, 1f),
+                new Color(0.36f, 0.26f, 0.16f), WorldArt.Shape.Square, 2);
         }
 
         void BuildLabels()
@@ -178,10 +193,16 @@ namespace TsOnline
             go.transform.position = pos;
             var chipGo = new GameObject("Chip");
             chipGo.transform.SetParent(go.transform, false);
+            var rim = new GameObject("ChipRim");
+            rim.transform.SetParent(go.transform, false);
+            rim.transform.localScale = new Vector3(3.85f, 0.70f, 1f);
+            var rimSr = rim.AddComponent<SpriteRenderer>();
+            rimSr.sprite = WorldArt.MakeQuad(new Color(0.08f, 0.07f, 0.06f, 0.9f), 12);
+            rimSr.sortingOrder = 3;
             chipGo.transform.localScale = new Vector3(3.6f, 0.58f, 1f);
             var sr = chipGo.AddComponent<SpriteRenderer>();
-            sr.sprite = WorldArt.MakeQuad(new Color(chip.r, chip.g, chip.b, 0.92f), 12);
-            sr.sortingOrder = 3;
+            sr.sprite = WorldArt.MakeQuad(new Color(chip.r, chip.g, chip.b, 0.94f), 12);
+            sr.sortingOrder = 4;
             WorldArt.MakeLabel(go.transform, text, Vector3.zero, Color.white, 0.16f, 28);
         }
 
@@ -195,14 +216,42 @@ namespace TsOnline
             sr.sortingOrder = sort;
         }
 
-        static void CreateGround(string name, Vector3 pos, Vector3 scale, bool city, int sort)
+        static void PlaceSprite(string name, Vector3 pos, float scale, Sprite sprite, int sort)
+        {
+            var go = new GameObject(name);
+            go.transform.position = pos;
+            go.transform.localScale = new Vector3(scale, scale, 1f);
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite;
+            sr.sortingOrder = sort;
+        }
+
+        static void PlaceStrip(string name, Vector3 pos, Vector3 scale, Color color, int sort)
         {
             var go = new GameObject(name);
             go.transform.position = pos;
             go.transform.localScale = scale;
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = WorldArt.MakeGround(city);
+            sr.sprite = WorldArt.MakeQuad(color, 12);
             sr.sortingOrder = sort;
+        }
+
+        static void FillTiles(string rootName, float xMin, float xMax, float yMin, float yMax, Sprite sprite, int sort)
+        {
+            var root = new GameObject(rootName);
+            const float step = 1f;
+            for (float y = yMin; y < yMax - 0.01f; y += step)
+            {
+                for (float x = xMin; x < xMax - 0.01f; x += step)
+                {
+                    var go = new GameObject("tile");
+                    go.transform.SetParent(root.transform, false);
+                    go.transform.position = new Vector3(x + step * 0.5f, y + step * 0.5f, 1f);
+                    var sr = go.AddComponent<SpriteRenderer>();
+                    sr.sprite = sprite;
+                    sr.sortingOrder = sort;
+                }
+            }
         }
 
         static void ApplyCamera()

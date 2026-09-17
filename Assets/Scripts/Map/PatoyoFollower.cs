@@ -17,11 +17,13 @@ namespace TsOnline
                 : new Vector3(-7f, -0.4f, 0f);
             go.transform.position = start;
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = WorldArt.MakeShape(new Color(1f, 0.52f, 0.70f), 22, WorldArt.Shape.Blob);
+            sr.sprite = WorldArt.MakeShape(new Color(1f, 0.52f, 0.70f), 24, WorldArt.Shape.Blob, true,
+                WorldArt.ActorMark.Patoyo);
             sr.sortingOrder = 6;
+            WorldArt.AttachShadow(go.transform, 6, 1.1f);
             var follow = go.AddComponent<PatoyoFollower>();
             follow.target = lead;
-            WorldArt.MakeLabel(go.transform, "ปาโต้เยา", new Vector3(0f, 0.58f, 0f),
+            WorldArt.MakeLabel(go.transform, "ปาโต้เยา", new Vector3(0f, 0.62f, 0f),
                 new Color(1f, 0.86f, 0.92f), 0.12f, 22);
             return go;
         }

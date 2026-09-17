@@ -29,7 +29,7 @@ Out of scope: networking, gacha, multi-quest journal.
 No save → CharacterCreate. Existing save → World.  
 **F8** in World deletes the save and returns to create.
 
-UI readability (HUD, battle bars, placeholders): **[UI_POLISH.md](UI_POLISH.md)**.
+UI readability (HUD, battle bars, placeholders): **[UI_POLISH.md](UI_POLISH.md)** (pass 2 = denser tiles / chrome; §8).
 
 2D URP click path: **[Assets/Settings/README_URP.md](Assets/Settings/README_URP.md)**.  
 Missing icons: **Tools → TS Online → Create Default Data Assets**.

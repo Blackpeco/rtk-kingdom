@@ -31,9 +31,11 @@ namespace TsOnline
             var go = new GameObject("PatoyoHelper");
             go.transform.position = new Vector3(-6.6f, -3.35f, 0f);
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = WorldArt.MakeShape(new Color(1f, 0.52f, 0.70f), 20, WorldArt.Shape.Blob);
+            sr.sprite = WorldArt.MakeShape(new Color(1f, 0.52f, 0.70f), 22, WorldArt.Shape.Blob, true,
+                WorldArt.ActorMark.Patoyo);
             sr.sortingOrder = 3;
-            WorldArt.MakeLabel(go.transform, "ปาโต้เยา", new Vector3(0f, 0.58f, 0f),
+            WorldArt.AttachShadow(go.transform, 3, 1.05f);
+            WorldArt.MakeLabel(go.transform, "ปาโต้เยา", new Vector3(0f, 0.62f, 0f),
                 new Color(1f, 0.86f, 0.92f), 0.13f, 22);
         }
     }

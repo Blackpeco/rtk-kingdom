@@ -9,6 +9,8 @@ namespace TsOnline
         string _name = "ผู้กล้า";
         ElementType _element = ElementType.Fire;
         string _error = "";
+        Texture2D _previewTex;
+        ElementType _previewEl = (ElementType)(-1);
 
         static readonly ElementType[] Choices =
         {
@@ -43,11 +45,13 @@ namespace TsOnline
 
             float elY = box.y + 108;
             float leftover = Mathf.Max(120f, topEnd - elY);
+            float previewH = leftover >= 210f ? 58f : 0f;
             float statH = leftover < 180f ? 56f : 72f;
             float roleH = 24f;
-            float elH = Mathf.Clamp(leftover - statH - roleH - 14f, 56f, 96f);
+            float elH = Mathf.Clamp(leftover - statH - roleH - previewH - 14f, 56f, 96f);
             float roleY = elY + elH + 6;
-            float statY = roleY + roleH + 4;
+            float previewY = roleY + roleH + 4;
+            float statY = previewH > 0f ? previewY + previewH + 4 : roleY + roleH + 4;
 
             float btnW = (w - 80f) / 4f;
             for (int i = 0; i < Choices.Length; i++)
@@ -61,6 +65,9 @@ namespace TsOnline
             var role = new GUIStyle(UiTheme.Title()) { fontSize = 20 };
             role.normal.textColor = Color.Lerp(CreatedHero.ColorOf(_element), Color.white, 0.35f);
             GUI.Label(new Rect(box.x + 28, roleY, w - 56, roleH), CreatedHero.RoleBlurb(_element), role);
+
+            if (previewH > 0f)
+                DrawPreview(new Rect(box.x + 28, previewY, w - 56, previewH), s);
 
             DrawStatRow(box.x + 28, statY, w - 56, s, _element, statH);
 
@@ -78,16 +85,41 @@ namespace TsOnline
                 Confirm();
         }
 
+        void DrawPreview(Rect r, UnitStats s)
+        {
+            Color col = CreatedHero.ColorOf(_element);
+            UiTheme.DrawFramedPanel(r, new Color(0.09f, 0.10f, 0.13f, 0.96f), col);
+            EnsurePreview();
+            if (_previewTex != null)
+                GUI.DrawTexture(new Rect(r.x + 12, r.y + 6, r.height - 10, r.height - 10), _previewTex, ScaleMode.ScaleToFit, true);
+            var name = new GUIStyle(UiTheme.Title()) { fontSize = 18 };
+            name.normal.textColor = Color.Lerp(col, Color.white, 0.3f);
+            string shown = string.IsNullOrWhiteSpace(_name) ? "ผู้กล้า" : _name.Trim();
+            GUI.Label(new Rect(r.x + r.height + 8, r.y + 6, r.width - r.height - 20, 22),
+                "หัวหน้า  ·  " + shown + "  ·  " + CreatedHero.Thai(_element), name);
+            GUI.Label(new Rect(r.x + r.height + 8, r.y + 28, r.width - r.height - 20, 22),
+                "HP " + s.hp + "   SP " + s.sp + "   ATK " + s.atk + "   AGI " + s.agi, UiTheme.Hint());
+        }
+
+        void EnsurePreview()
+        {
+            if (_previewTex != null && _previewEl == _element)
+                return;
+            Sprite spr = WorldArt.MakeShape(CreatedHero.ColorOf(_element), 48, WorldArt.Shape.Diamond, true,
+                WorldArt.ActorMark.Lead);
+            _previewTex = spr != null ? spr.texture : null;
+            _previewEl = _element;
+        }
+
         void DrawElementButton(Rect r, ElementType el)
         {
             Color col = CreatedHero.ColorOf(el);
             bool selected = _element == el;
-            UiTheme.DrawFill(r, selected ? Color.Lerp(col, Color.white, 0.18f) : col * 0.75f);
-            if (selected)
-            {
-                UiTheme.DrawFill(new Rect(r.x, r.y, r.width, 4f), Color.white);
-                UiTheme.DrawFill(new Rect(r.x, r.yMax - 4f, r.width, 4f), Color.white);
-            }
+            UiTheme.DrawFill(new Rect(r.x - 1f, r.y - 1f, r.width + 2f, r.height + 2f),
+                selected ? Color.white : new Color(0f, 0f, 0f, 0.7f));
+            UiTheme.DrawFill(r, selected ? Color.Lerp(col, Color.white, 0.16f) : col * 0.72f);
+            UiTheme.DrawFill(new Rect(r.x + 4, r.y + 4, r.width - 8, 3f), Color.Lerp(col, Color.white, 0.45f));
+            DrawElementGlyph(new Rect(r.x + r.width * 0.5f - 10, r.y + r.height * 0.42f - 8, 20, 16), el, col);
 
             var thai = new GUIStyle(UiTheme.Title())
             {
@@ -96,13 +128,40 @@ namespace TsOnline
             };
             thai.normal.textColor = Color.white;
             var en = new GUIStyle(UiTheme.Hint()) { alignment = TextAnchor.MiddleCenter, fontSize = 14 };
-            GUI.Label(new Rect(r.x, r.y + 8, r.width, 32), CreatedHero.Thai(el), thai);
-            GUI.Label(new Rect(r.x, r.y + r.height * 0.48f, r.width, 20), CreatedHero.English(el), en);
+            GUI.Label(new Rect(r.x, r.y + 8, r.width, 28), CreatedHero.Thai(el), thai);
+            GUI.Label(new Rect(r.x, r.y + r.height * 0.58f, r.width, 18), CreatedHero.English(el), en);
             if (selected)
-                GUI.Label(new Rect(r.x, r.y + r.height - 22, r.width, 20), "▸ เลือกแล้ว", en);
+                GUI.Label(new Rect(r.x, r.y + r.height - 20, r.width, 18), "▸ เลือกแล้ว", en);
 
             if (GUI.Button(r, GUIContent.none, GUIStyle.none))
                 _element = el;
+        }
+
+        static void DrawElementGlyph(Rect r, ElementType el, Color col)
+        {
+            Color ink = Color.Lerp(col, Color.white, 0.55f);
+            switch (el)
+            {
+                case ElementType.Earth:
+                    UiTheme.DrawFill(new Rect(r.x, r.y + 8, r.width, 6), ink);
+                    UiTheme.DrawFill(new Rect(r.x + 4, r.y + 3, r.width - 8, 6), ink);
+                    UiTheme.DrawFill(new Rect(r.x + 8, r.y, 4, 6), ink);
+                    break;
+                case ElementType.Water:
+                    UiTheme.DrawFill(new Rect(r.x + 7, r.y, 6, 6), ink);
+                    UiTheme.DrawFill(new Rect(r.x + 4, r.y + 5, 12, 8), ink);
+                    break;
+                case ElementType.Fire:
+                    UiTheme.DrawFill(new Rect(r.x + 8, r.y, 4, 5), ink);
+                    UiTheme.DrawFill(new Rect(r.x + 5, r.y + 4, 10, 6), ink);
+                    UiTheme.DrawFill(new Rect(r.x + 3, r.y + 9, 14, 6), ink);
+                    break;
+                default:
+                    UiTheme.DrawFill(new Rect(r.x + 1, r.y + 2, r.width - 4, 3), ink);
+                    UiTheme.DrawFill(new Rect(r.x + 3, r.y + 7, r.width - 6, 3), ink);
+                    UiTheme.DrawFill(new Rect(r.x + 5, r.y + 12, r.width - 8, 3), ink);
+                    break;
+            }
         }
 
         static void DrawStatRow(float x, float y, float width, UnitStats s, ElementType el, float height = 72f)
@@ -125,6 +184,8 @@ namespace TsOnline
                 Color bg = hot[i]
                     ? Color.Lerp(CreatedHero.ColorOf(el), new Color(0.12f, 0.12f, 0.14f), 0.45f)
                     : new Color(0.12f, 0.13f, 0.16f, 0.95f);
+                UiTheme.DrawFill(new Rect(r.x - 1f, r.y - 1f, r.width + 2f, r.height + 2f),
+                    hot[i] ? CreatedHero.ColorOf(el) : new Color(0f, 0f, 0f, 0.55f));
                 UiTheme.DrawFill(r, bg);
                 var name = new GUIStyle(UiTheme.Hint()) { alignment = TextAnchor.MiddleCenter, fontSize = 14 };
                 var val = new GUIStyle(UiTheme.Title()) { alignment = TextAnchor.MiddleCenter, fontSize = height < 64f ? 18 : 22 };

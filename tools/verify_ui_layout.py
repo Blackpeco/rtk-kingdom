@@ -72,6 +72,16 @@ def main():
             print("FAIL create hint sits on Confirm at %sx%s" % (w, h))
             ok = False
 
+        p_btn = rect(w - 268.0, 12, 248, 40)
+        toast_w = min(440.0, w - 32.0)
+        toast = rect(16, h - 42, toast_w, 34)
+        if overlaps(p_btn, toast):
+            print("FAIL party-open toast overlaps P button at %sx%s" % (w, h))
+            ok = False
+        if toast[1] < 0:
+            print("FAIL party-open toast off-screen at %sx%s" % (w, h))
+            ok = False
+
         quest_w = min(560.0, max(280.0, w - 40.0))
         if quest_w > w - 32:
             print("FAIL quest dialog wider than screen at %s" % w)

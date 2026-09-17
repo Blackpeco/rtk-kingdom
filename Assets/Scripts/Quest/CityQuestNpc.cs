@@ -20,13 +20,15 @@ namespace TsOnline
             var go = new GameObject("Npc_Grandma");
             go.transform.position = new Vector3(-7.5f, 1.7f, 0f);
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = WorldArt.MakeShape(new Color(0.62f, 0.42f, 0.88f), 22, WorldArt.Shape.Triangle);
+            sr.sprite = WorldArt.MakeShape(new Color(0.62f, 0.42f, 0.88f), 24, WorldArt.Shape.Triangle, true,
+                WorldArt.ActorMark.Grandma);
             sr.sortingOrder = 5;
+            WorldArt.AttachShadow(go.transform, 5, 1.15f);
             var col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
             col.radius = 0.7f;
             go.AddComponent<CityQuestNpc>();
-            WorldArt.MakeLabel(go.transform, "ยายเมือง", new Vector3(0f, 0.72f, 0f), Color.white, 0.13f, 24);
+            WorldArt.MakeLabel(go.transform, "ยายเมือง", new Vector3(0f, 0.76f, 0f), Color.white, 0.13f, 24);
             return go;
         }
 
@@ -152,7 +154,12 @@ namespace TsOnline
                     ? Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 0.9f)
                     : Vector3.zero;
                 if (Camera.main != null && screen.z > 0f)
-                    GUI.Label(new Rect(screen.x - 80, Screen.height - screen.y - 10, 160, 26), "กด E เพื่อคุย", UiTheme.Body());
+                {
+                    var prompt = new Rect(screen.x - 88, Screen.height - screen.y - 14, 176, 28);
+                    UiTheme.DrawFramedPanel(prompt, new Color(0.10f, 0.09f, 0.14f, 0.92f), UiTheme.LeadGold);
+                    GUI.Label(new Rect(prompt.x + 10, prompt.y, prompt.width - 14, prompt.height),
+                        "กด E เพื่อคุย", UiTheme.Body());
+                }
             }
 
             if (!_talking)

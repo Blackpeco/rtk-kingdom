@@ -83,7 +83,7 @@ After the readability pass, two layout issues were fixed. Gameplay / save / Last
 
 | Issue | Before | After |
 | --- | --- | --- |
-| Party open + short Game view | WorldHUD **บันทึก / โหลด / เกมใหม่** sat on the party modal. At **1024×576**, F8 could steal **เข้า** (wipe save). | Those three **GUI.Button**s are **not drawn** while `PartyMenuOpen`. **F5 / F9 / F8 keys still work.** Toast may still show under the P button (label only). |
+| Party open + short Game view | WorldHUD **บันทึก / โหลด / เกมใหม่** sat on the party modal. At **1024×576**, F8 could steal **เข้า** (wipe save). | Those three **GUI.Button**s are **not drawn** while `PartyMenuOpen`. **F5 / F9 / F8 keys still work.** Toast is framed; while P is open it sits **bottom-left** (see §8). |
 | Party header | Title 22px in a 28px row wrapped and lost “ตาในรบเรียง AGI”. | Title “ปาร์ตี้” + Hint subtitle with the full clause. |
 | HUD hint | One 22px line; WASD copy wrapped into the gold quest band. | Two reserved lines; shorter copy. HUD is 188px, party strip starts at 208. |
 | Party strip names | Long 16-char names spilled into Lv/HP. | Ellipsis in the 250px name column. |
@@ -102,7 +102,7 @@ The party modal and the city quest dialog must not be open together (OnGUI stack
 Play **Boot** (or World with a save). Check **1024×576**, **1280×720**, and **1600×900**:
 
 1. World, party **closed**: F5 / F9 / F8 buttons still click. Keys still work.
-2. Press **P**. Save/new-game **buttons disappear**. Click first roster **เข้า**, ▲ ▼, **ออก**, alloc +HP — must not jump to CharacterCreate. Press **F5** (key) — toast under the P button, no wipe. Esc / ปิดปาร์ตี้ — buttons return.
+2. Press **P**. Save/new-game **buttons disappear**. Click first roster **เข้า**, ▲ ▼, **ออก**, alloc +HP — must not jump to CharacterCreate. Press **F5** (key) — framed toast at the **bottom-left**, not under the P button; no wipe. Esc / ปิดปาร์ตี้ — buttons return.
 3. Party header shows the full AGI clause. Strip names with a 16-char create name stay in the left column (`…`).
 4. HUD: two hint lines, then gold quest, then LastEnd — no overlap. After a forest fight, LastEnd still appears.
 5. ยายเมือง **E**: dialog stays on screen if you shrink the Game view; **รับเควสต์** / **ปิด** still clickable.
@@ -110,3 +110,38 @@ Play **Boot** (or World with a save). Check **1024×576**, **1280×720**, and **
 7. Boot → create → wanderer → Battle commands / auto → return. F9 load. Sandbox **Battle.unity** then World must **not** fake LastEnd.
 8. **P** and ยายเมือง **E** are exclusive: party open → E does nothing and the quest dialog is not drawn; dialog open → P / ปาร์ตี้ does not open the panel. Close one (Esc / ปิด / ปิดปาร์ตี้), then the other works. WASD still locked while either is open. F5/F9/F8 hide-while-party unchanged.
 9. Forest wanderer must **not** start Battle while `MenuOpen` (party panel **or** ยายเมือง dialog). They still roam. Close the UI; if you are still overlapping, Stay starts the fight (same save-on-enter / grace lock). Standing still when the 1.6s return grace ends does **not** auto-start — walk into a pack, or close P/E while overlapping. **F9** (or any `TryApplyWorldPosition` teleport) clears leftover `_deferredByMenu` flags **and** ยายเมือง talk state: open **P** on a pack, **F9** to a city save, close **P** — must **not** start a forest Battle. Talk near grandma, **F9** to a forest save — no E prompt / no stuck dialog; land on grandma after F9 and **E** works again.
+
+## 8. Second polish — denser placeholders (this pass)
+
+Readability pass 1 kept contrast. This pass makes World / Battle / menus look **denser and more cohesive** without touching formulas, save, Wind, LastEnd, Battle save gate, MenuOpen skip, Stay menu-defer, F9 clears, or P↔E mutex.
+
+Play **`Assets/Scenes/Boot.unity`** (Game view 16:9, e.g. 1600×900). Offline; no networking.
+
+### Before → after
+
+| Surface | Before (pass 1) | After (this pass) |
+| --- | --- | --- |
+| World ground | One stretched cobble / grass quad | **1×1 tiled** city cobble (offset stones + moss) vs forest (dirt / leaf specks); tan **road** with ruts; **city stone vs forest hedge** strips at the seam |
+| Decor | Flat house squares + tree triangles | House silhouettes (roof / door / windows), layered trees, road posts. No colliders |
+| Actors | Flat diamond / blob / triangle / pack shapes | Element-tinted **lead** (head + belt), **ปาโต้เยา** face, **ยายเมือง** hat, wanderer marks; **soft oval shadows**; stronger label shadows |
+| WorldHUD | Flat dark panel | Framed chrome + element **chip** + gold/element accent. F5/F9/F8 **positions unchanged**. Party open: toast **bottom-left** (framed), not under P |
+| Battle arena | Two flat side quads + gold line | Tiled cool / warm floors, side trims, mid glow; unit shadows + lead mark on players |
+| Battle HUD | Plain cards, thin chip, flat bars | Left element stripe, diamond chip, inset HP/SP with shine; command bar gold chrome + inset buttons |
+| Popups | Dark plate on both ข่มธาตุ / ธาตุต้าน | **ข่มธาตุ!** gold plate, **ธาตุต้าน** gray plate |
+| Auto / level-up | Same panel as HUD | Shared `UiTheme` frame; level-up HP/SP bars |
+| CharacterCreate | Color blocks + stat strip | Glyph tiles, selected white frame, **preview** (silhouette + หัวหน้า · name · ธาตุ) when height allows |
+| Party (P) | Gold-on-gold หัวหน้า, text HP | Alternating rows, selected warm fill, dark+gold **หัวหน้า** badge, strip + alloc **HP/SP bars** |
+
+### Editor click path
+
+1. Wipe save if needed (**F8** or delete `ts_online_save.json`). Play **Boot** → CharacterCreate: click ดิน/น้ำ/ไฟ/ลม — tiles + preview update; **เริ่มเดินทาง**.
+2. World: city cobble left, forest right, road through the middle, houses / trees readable. Lead diamond + หัวหน้า label; pink ปาโต้เยา; purple ยายเมือง; หมาป่า / โจร / กบ still roam the same packs.
+3. HUD: name + chip, green HP / blue SP, two hint lines, gold quest, LastEnd after a fight. **F5** toast under F8 when P is closed.
+4. **P**: strip rows + mini HP; full panel หัวหน้า badge (no ออก on lead); alloc bars + same +stat buttons. **F5** (key) toast bottom-left. Buttons F5/F9/F8 hidden while P is open.
+5. Walk a wanderer → Battle: tiled sides, cards, commands, Auto panel. Force an advantage / resist hit if you can — gold **ข่มธาตุ!** vs gray **ธาตุต้าน**. Level-up panel uses the same chrome.
+6. Re-check §7 items 1–9 (mutex, MenuOpen skip, Stay-after-defer, F9 clears). Unchanged.
+
+`python3 tools/verify_formulas.py` → **PASS**  
+`python3 tools/verify_ui_layout.py` → **PASS** (HUD 188 / strip 208 / F5 cluster / create confirm; plus party-open toast vs P).
+
+Placeholders: `python3 tools/generate_placeholders.py` (GUIDs kept when `.meta` exists). New optional disks: `road_tile.png`, `house.png`, `tree.png`. Runtime still uses `WorldArt`.

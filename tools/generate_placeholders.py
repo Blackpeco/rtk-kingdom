@@ -196,39 +196,44 @@ def shade(base, hi, lo, x, y, size):
 
 def icon_earth(size=32):
     px = blank(size)
-    fill_rect(px, size, 4, 4, 27, 27, (184, 135, 61, 255))
-    fill_triangle(px, size, 16, 8, 22, (120, 82, 32, 255))
-    fill_rect(px, size, 6, 6, 25, 9, (210, 176, 96, 255))
-    return outline(px, size, (70, 46, 18, 255))
+    fill_rect(px, size, 3, 3, 28, 28, (168, 120, 52, 255))
+    fill_rect(px, size, 5, 5, 26, 8, (214, 178, 96, 255))
+    fill_triangle(px, size, 16, 9, 24, (118, 78, 30, 255))
+    fill_triangle(px, size, 16, 13, 24, (150, 104, 44, 255))
+    fill_rect(px, size, 8, 23, 24, 26, (92, 64, 28, 255))
+    return outline(px, size, (62, 40, 14, 255))
 
 
 def icon_water(size=32):
     px = blank(size)
-    fill_rect(px, size, 4, 4, 27, 27, (46, 134, 193, 255))
-    # drop
-    fill_circle(px, size, 16, 11, 6, (210, 236, 255, 255))
-    fill_triangle(px, size, 16, 10, 25, (210, 236, 255, 255))
-    fill_circle(px, size, 14, 10, 2, (255, 255, 255, 255))
-    return outline(px, size, (16, 52, 92, 255))
+    fill_rect(px, size, 3, 3, 28, 28, (40, 122, 186, 255))
+    fill_rect(px, size, 5, 5, 26, 8, (72, 168, 220, 255))
+    fill_circle(px, size, 16, 12, 6, (210, 236, 255, 255))
+    fill_triangle(px, size, 16, 11, 26, (210, 236, 255, 255))
+    fill_circle(px, size, 14, 11, 2, (255, 255, 255, 255))
+    fill_rect(px, size, 10, 24, 22, 26, (24, 72, 120, 255))
+    return outline(px, size, (14, 46, 84, 255))
 
 
 def icon_fire(size=32):
     px = blank(size)
-    fill_rect(px, size, 4, 4, 27, 27, (200, 58, 42, 255))
-    fill_triangle(px, size, 16, 6, 26, (255, 196, 64, 255))
-    fill_triangle(px, size, 16, 10, 24, (255, 92, 36, 255))
-    fill_circle(px, size, 16, 12, 3, (255, 230, 140, 255))
-    return outline(px, size, (88, 18, 12, 255))
+    fill_rect(px, size, 3, 3, 28, 28, (188, 48, 36, 255))
+    fill_rect(px, size, 5, 5, 26, 8, (230, 86, 52, 255))
+    fill_triangle(px, size, 16, 6, 27, (255, 196, 64, 255))
+    fill_triangle(px, size, 16, 11, 25, (255, 92, 36, 255))
+    fill_circle(px, size, 16, 13, 3, (255, 230, 140, 255))
+    return outline(px, size, (80, 16, 10, 255))
 
 
 def icon_wind(size=32):
     px = blank(size)
-    fill_rect(px, size, 4, 4, 27, 27, (72, 186, 118, 255))
-    for i, y in enumerate((10, 16, 22)):
-        fill_rect(px, size, 7 + i, y, 24, y + 2, (230, 255, 230, 255))
-        plot(px, size, 25, y + 1, (230, 255, 230, 255))
-        plot(px, size, 26, y, (230, 255, 230, 255))
-    return outline(px, size, (20, 72, 40, 255))
+    fill_rect(px, size, 3, 3, 28, 28, (64, 172, 108, 255))
+    fill_rect(px, size, 5, 5, 26, 8, (110, 210, 140, 255))
+    for i, y in enumerate((11, 17, 23)):
+        fill_rect(px, size, 6 + i, y, 23, y + 2, (230, 255, 232, 255))
+        plot(px, size, 24, y + 1, (230, 255, 232, 255))
+        plot(px, size, 25, y, (230, 255, 232, 255))
+    return outline(px, size, (18, 64, 36, 255))
 
 
 def sprite_lead(size=32):
@@ -241,27 +246,32 @@ def sprite_lead(size=32):
         for x in range(size):
             if px[y * size + x] == body:
                 px[y * size + x] = shade(body, hi, lo, x, y, size)
+    fill_rect(px, size, 12, 18, 20, 19, (120, 80, 20, 255))
     fill_circle(px, size, 16, 10, 5, (255, 224, 186, 255))
     plot(px, size, 14, 10, (40, 24, 16, 255))
     plot(px, size, 18, 10, (40, 24, 16, 255))
+    plot(px, size, 16, 13, (180, 90, 70, 255))
     return outline(px, size, (70, 46, 10, 255))
 
 
 def sprite_patoyo(size=32):
     px = blank(size)
-    fill_circle(px, size, 16, 16, 12, (255, 132, 178, 255))
-    fill_circle(px, size, 11, 11, 3, (255, 196, 214, 255))
-    plot(px, size, 12, 15, (48, 16, 28, 255))
-    plot(px, size, 20, 15, (48, 16, 28, 255))
-    fill_rect(px, size, 14, 19, 18, 20, (180, 48, 80, 255))
+    fill_circle(px, size, 16, 17, 12, (255, 132, 178, 255))
+    fill_circle(px, size, 11, 12, 3, (255, 196, 214, 255))
+    fill_circle(px, size, 10, 18, 1, (240, 90, 130, 255))
+    fill_circle(px, size, 22, 18, 1, (240, 90, 130, 255))
+    plot(px, size, 12, 16, (48, 16, 28, 255))
+    plot(px, size, 20, 16, (48, 16, 28, 255))
+    fill_rect(px, size, 14, 20, 18, 21, (180, 48, 80, 255))
     return outline(px, size, (120, 32, 64, 255))
 
 
 def sprite_grandma(size=32):
     px = blank(size)
-    fill_triangle(px, size, 16, 6, 28, (150, 102, 214, 255))
+    fill_triangle(px, size, 16, 6, 29, (150, 102, 214, 255))
     fill_circle(px, size, 16, 9, 5, (236, 210, 186, 255))
-    fill_rect(px, size, 11, 4, 21, 7, (90, 56, 140, 255))
+    fill_rect(px, size, 10, 4, 22, 7, (84, 50, 132, 255))
+    fill_rect(px, size, 12, 18, 20, 19, (90, 56, 140, 255))
     plot(px, size, 14, 9, (40, 24, 32, 255))
     plot(px, size, 18, 9, (40, 24, 32, 255))
     return outline(px, size, (56, 28, 92, 255))
@@ -270,8 +280,9 @@ def sprite_grandma(size=32):
 def sprite_wolf(size=32):
     px = blank(size)
     fill_diamond(px, size, 16, 17, 12, (64, 196, 110, 255))
-    fill_triangle(px, size, 10, 4, 12, (40, 140, 72, 255))
-    fill_triangle(px, size, 22, 4, 12, (40, 140, 72, 255))
+    fill_triangle(px, size, 10, 3, 12, (40, 140, 72, 255))
+    fill_triangle(px, size, 22, 3, 12, (40, 140, 72, 255))
+    fill_circle(px, size, 16, 20, 2, (40, 100, 56, 255))
     plot(px, size, 13, 16, (16, 32, 16, 255))
     plot(px, size, 19, 16, (16, 32, 16, 255))
     return outline(px, size, (16, 64, 28, 255))
@@ -279,11 +290,12 @@ def sprite_wolf(size=32):
 
 def sprite_bandit(size=32):
     px = blank(size)
-    fill_rect(px, size, 7, 8, 24, 26, (220, 64, 46, 255))
-    fill_rect(px, size, 10, 4, 21, 12, (255, 210, 176, 255))
-    fill_rect(px, size, 10, 4, 21, 7, (48, 20, 16, 255))
-    plot(px, size, 13, 9, (32, 12, 12, 255))
-    plot(px, size, 18, 9, (32, 12, 12, 255))
+    fill_rect(px, size, 7, 9, 24, 27, (220, 64, 46, 255))
+    fill_rect(px, size, 10, 4, 21, 13, (255, 210, 176, 255))
+    fill_rect(px, size, 10, 4, 21, 8, (48, 20, 16, 255))
+    fill_rect(px, size, 13, 18, 18, 24, (40, 18, 14, 255))
+    plot(px, size, 13, 10, (32, 12, 12, 255))
+    plot(px, size, 18, 10, (32, 12, 12, 255))
     return outline(px, size, (88, 16, 12, 255))
 
 
@@ -294,8 +306,26 @@ def sprite_frog(size=32):
     fill_circle(px, size, 22, 11, 4, (80, 190, 255, 255))
     plot(px, size, 10, 11, (12, 24, 48, 255))
     plot(px, size, 22, 11, (12, 24, 48, 255))
-    fill_rect(px, size, 13, 20, 19, 22, (20, 48, 96, 255))
+    fill_rect(px, size, 13, 21, 19, 23, (20, 48, 96, 255))
     return outline(px, size, (12, 48, 96, 255))
+
+
+def sprite_house(size=32):
+    px = blank(size)
+    fill_rect(px, size, 6, 14, 25, 29, (148, 96, 74, 255))
+    fill_triangle(px, size, 16, 3, 16, (120, 48, 40, 255))
+    fill_rect(px, size, 13, 21, 18, 29, (48, 30, 22, 255))
+    fill_rect(px, size, 8, 17, 11, 20, (220, 196, 90, 255))
+    fill_rect(px, size, 20, 17, 23, 20, (220, 196, 90, 255))
+    return outline(px, size, (48, 24, 18, 255))
+
+
+def sprite_tree(size=32):
+    px = blank(size)
+    fill_rect(px, size, 14, 20, 17, 29, (86, 54, 28, 255))
+    fill_triangle(px, size, 16, 4, 24, (28, 90, 36, 255))
+    fill_triangle(px, size, 16, 9, 22, (46, 122, 48, 255))
+    return outline(px, size, (12, 40, 16, 255))
 
 
 def tile_city(size=32):
@@ -305,9 +335,13 @@ def tile_city(size=32):
             cell = 8
             ox = cell // 2 if (y // cell) % 2 else 0
             mortar = ((x + ox) % cell == 0) or (y % cell == 0)
-            n = ((x * 17 + y * 31) & 255) / 255
-            stone = (int(118 + 40 * n), int(112 + 36 * n), int(96 + 28 * n), 255)
-            px[y * size + x] = (76, 70, 60, 255) if mortar else stone
+            n = ((x * 17 + y * 31) & 255) / 255.0
+            n2 = ((x * 11 + y * 19) & 255) / 255.0
+            stone = (int(112 + 48 * n), int(106 + 42 * n), int(90 + 32 * n), 255)
+            if n2 > 0.88:
+                stone = (int(stone[0] * 0.75), int(stone[1] * 0.82), int(stone[2] * 0.70), 255)
+            grout = (68, 72, 52, 255) if n > 0.65 else (72, 64, 54, 255)
+            px[y * size + x] = grout if mortar else stone
     return px
 
 
@@ -315,11 +349,33 @@ def tile_forest(size=32):
     px = blank(size)
     for y in range(size):
         for x in range(size):
-            n = ((x * 13 + y * 29) & 255) / 255
-            g = int(28 + 48 * n)
-            px[y * size + x] = (18, g, 22, 255)
-            if (x + y * 3) % 17 == 0:
-                px[y * size + x] = (14, 40, 18, 255)
+            n = ((x * 13 + y * 29) & 255) / 255.0
+            n2 = ((x * 7 + y * 41) & 255) / 255.0
+            g = int(26 + 52 * n)
+            px[y * size + x] = (16, g, 20, 255)
+            if n2 > 0.90:
+                px[y * size + x] = (56, 46, 24, 255)
+            elif (x + y * 3) % 13 == 0:
+                px[y * size + x] = (36, 96, 34, 255)
+            elif (x * 5 + y) % 19 == 0:
+                px[y * size + x] = (70, 88, 28, 255)
+    return px
+
+
+def tile_road(size=32):
+    px = blank(size)
+    for y in range(size):
+        for x in range(size):
+            n = ((x * 9 + y * 21) & 255) / 255.0
+            ny = y / max(1, size - 1)
+            dirt = (int(128 + 40 * n), int(96 + 32 * n), int(54 + 22 * n), 255)
+            if ny < 0.18 or ny > 0.82:
+                dirt = (82, 60, 34, 255)
+            if abs(ny - 0.38) < 0.06 or abs(ny - 0.62) < 0.06:
+                dirt = (92, 66, 36, 255)
+            if (x + y) % 11 == 0:
+                dirt = (110, 102, 88, 255)
+            px[y * size + x] = dirt
     return px
 
 
@@ -346,14 +402,17 @@ def main() -> None:
     write_sprite("Assets/Art/Icons/fire.png", icon_fire(), 32, 32, keep_guid=True)
     write_sprite("Assets/Art/Icons/wind.png", icon_wind(), 32, 32, keep_guid=True)
 
-    write_sprite("Assets/Art/Placeholders/player_lead.png", sprite_lead(), 32, 32)
-    write_sprite("Assets/Art/Placeholders/patoyo.png", sprite_patoyo(), 32, 32)
-    write_sprite("Assets/Art/Placeholders/grandma.png", sprite_grandma(), 32, 32)
-    write_sprite("Assets/Art/Placeholders/wolf.png", sprite_wolf(), 32, 32)
-    write_sprite("Assets/Art/Placeholders/bandit.png", sprite_bandit(), 32, 32)
-    write_sprite("Assets/Art/Placeholders/frog.png", sprite_frog(), 32, 32)
-    write_sprite("Assets/Art/Placeholders/city_tile.png", tile_city(), 32, 32)
-    write_sprite("Assets/Art/Placeholders/forest_tile.png", tile_forest(), 32, 32)
+    write_sprite("Assets/Art/Placeholders/player_lead.png", sprite_lead(), 32, 32, keep_guid=True)
+    write_sprite("Assets/Art/Placeholders/patoyo.png", sprite_patoyo(), 32, 32, keep_guid=True)
+    write_sprite("Assets/Art/Placeholders/grandma.png", sprite_grandma(), 32, 32, keep_guid=True)
+    write_sprite("Assets/Art/Placeholders/wolf.png", sprite_wolf(), 32, 32, keep_guid=True)
+    write_sprite("Assets/Art/Placeholders/bandit.png", sprite_bandit(), 32, 32, keep_guid=True)
+    write_sprite("Assets/Art/Placeholders/frog.png", sprite_frog(), 32, 32, keep_guid=True)
+    write_sprite("Assets/Art/Placeholders/city_tile.png", tile_city(), 32, 32, keep_guid=True)
+    write_sprite("Assets/Art/Placeholders/forest_tile.png", tile_forest(), 32, 32, keep_guid=True)
+    write_sprite("Assets/Art/Placeholders/road_tile.png", tile_road(), 32, 32, keep_guid=True)
+    write_sprite("Assets/Art/Placeholders/house.png", sprite_house(), 32, 32, keep_guid=True)
+    write_sprite("Assets/Art/Placeholders/tree.png", sprite_tree(), 32, 32, keep_guid=True)
     print("placeholder sprites ready")
 
 
