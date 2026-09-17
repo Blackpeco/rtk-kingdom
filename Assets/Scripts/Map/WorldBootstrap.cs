@@ -23,10 +23,13 @@ namespace TsOnline
         void Start()
         {
             PartyManager.Ensure();
+            SaveService.HydrateIfNeeded();
             ApplyCamera();
             BuildGround();
             BuildLabels();
             GameObject player = BuildPlayer();
+            PatoyoFollower.Spawn(player.transform);
+            CityQuestNpc.Spawn();
             LoadEnemyRefs();
             BuildForestEncounters();
             gameObject.AddComponent<WorldHUD>();
@@ -37,12 +40,15 @@ namespace TsOnline
                 Vector3 back = EncounterContext.ReturnPosition + Vector3.left * 1.25f;
                 player.transform.position = back;
                 EncounterContext.MarkReturned();
+                SaveService.PendingWorldPos = null;
+                SaveService.Save(player.transform.position);
                 EncountersLocked = true;
                 Invoke(nameof(UnlockEncounters), ReturnGraceSeconds);
             }
             else
             {
                 EncountersLocked = false;
+                SaveService.TryApplyWorldPosition(player.transform);
             }
 
             var camFollow = Camera.main != null ? Camera.main.gameObject.AddComponent<WorldCameraFollow>() : null;

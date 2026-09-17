@@ -90,8 +90,29 @@ namespace TsOnline
 
             if (command == BattleCommand.Item)
             {
-                Log("ไอเทมยังไม่พร้อม (Step 2 stub)");
-                EndCurrentTurn();
+                if (InventoryService.CountOf(InventoryService.HerbId) <= 0)
+                {
+                    PendingCommand = BattleCommand.None;
+                    Log("ไม่มีสมุนไพร — ใช้ปาโต้เยาแทนได้");
+                    Notify();
+                    return;
+                }
+
+                BeginAllyPick(BattleCommand.Item, "เลือกเป้าหมายสมุนไพร (+" + InventoryService.HerbHeal + " HP)");
+                return;
+            }
+
+            if (command == BattleCommand.Patoyo)
+            {
+                if (PatoyoHelper.ChargesLeft <= 0)
+                {
+                    PendingCommand = BattleCommand.None;
+                    Log("ปาโต้เยาเหนื่อยแล้วในรบนี้");
+                    Notify();
+                    return;
+                }
+
+                BeginAllyPick(BattleCommand.Patoyo, "ปาโต้เยา จะรักษาใคร?  (+" + PatoyoHelper.HealAmount + " HP)");
                 return;
             }
 
@@ -193,6 +214,22 @@ namespace TsOnline
                 return;
             }
 
+            if (PendingCommand == BattleCommand.Patoyo)
+            {
+                if (!target.isPlayer)
+                    return;
+                ResolvePatoyo(target);
+                return;
+            }
+
+            if (PendingCommand == BattleCommand.Item)
+            {
+                if (!target.isPlayer)
+                    return;
+                ResolveHerb(target);
+                return;
+            }
+
             if (PendingCommand == BattleCommand.Skill && PendingSkill != null)
             {
                 bool wantAlly = SkillSystem.TargetsAllies(PendingSkill);
@@ -200,6 +237,68 @@ namespace TsOnline
                     return;
                 ResolveSkill(CurrentActor, PendingSkill, new[] { target });
             }
+        }
+
+        void BeginAllyPick(BattleCommand command, string banner)
+        {
+            var allies = Living(PlayerUnits);
+            if (allies.Count == 0)
+            {
+                Log("ไม่มีพันธมิตรให้รักษา");
+                Notify();
+                return;
+            }
+
+            PendingCommand = command;
+            if (allies.Count == 1)
+            {
+                if (command == BattleCommand.Patoyo)
+                    ResolvePatoyo(allies[0]);
+                else
+                    ResolveHerb(allies[0]);
+                return;
+            }
+
+            State = BattleState.AwaitingTarget;
+            Banner = banner;
+            Notify();
+        }
+
+        void ResolvePatoyo(BattleUnit target)
+        {
+            State = BattleState.Resolving;
+            if (!PatoyoHelper.TryHeal(target))
+            {
+                Log("ปาโต้เยาช่วยไม่ได้");
+                State = BattleState.AwaitingCommand;
+                Banner = "ตาของ " + CurrentActor.ShortName;
+                Notify();
+                return;
+            }
+
+            Log("ปาโต้เยา รักษา " + target.ShortName + " +" + PatoyoHelper.HealAmount + " HP  (เหลือ "
+                + PatoyoHelper.ChargesLeft + " ครั้ง)");
+            Popup(target, "+" + PatoyoHelper.HealAmount, new Color(1f, 0.65f, 0.8f));
+            EndCurrentTurn();
+        }
+
+        void ResolveHerb(BattleUnit target)
+        {
+            State = BattleState.Resolving;
+            if (!InventoryService.TryConsume(InventoryService.HerbId))
+            {
+                Log("ไม่มีสมุนไพร");
+                State = BattleState.AwaitingCommand;
+                Banner = "ตาของ " + CurrentActor.ShortName;
+                Notify();
+                return;
+            }
+
+            target.HealHp(InventoryService.HerbHeal);
+            Log(CurrentActor.ShortName + " ใช้สมุนไพร รักษา " + target.ShortName + " +"
+                + InventoryService.HerbHeal + " HP");
+            Popup(target, "+" + InventoryService.HerbHeal, new Color(0.55f, 0.95f, 0.5f));
+            EndCurrentTurn();
         }
 
         public void CancelToCommands()
@@ -221,6 +320,8 @@ namespace TsOnline
                 return new List<BattleUnit>();
             if (PendingCommand == BattleCommand.Attack)
                 return Living(EnemyUnits);
+            if (PendingCommand == BattleCommand.Patoyo || PendingCommand == BattleCommand.Item)
+                return Living(PlayerUnits);
             if (PendingSkill != null && SkillSystem.TargetsAllies(PendingSkill))
                 return Living(PlayerUnits);
             return Living(EnemyUnits);

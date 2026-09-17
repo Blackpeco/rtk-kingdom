@@ -41,6 +41,9 @@ namespace TsOnline
                     Debug.Log(report);
             }
 
+            SaveService.HydrateIfNeeded();
+            PatoyoHelper.ResetForBattle();
+
             ResolveRoster();
             if (!HasParty(playerParty) || !HasParty(enemyParty))
             {
@@ -60,6 +63,7 @@ namespace TsOnline
             _turns.OnChanged += HandleBattleChanged;
             _ui.Bind(_turns, auto);
             auto.Bind(_turns);
+            PatoyoHelper.SpawnBattleView();
             _turns.BeginBattle();
         }
 
@@ -78,9 +82,16 @@ namespace TsOnline
             PartyManager pm = PartyManager.Ensure();
             pm.WriteBackFromBattle(_turns.PlayerUnits);
             if (_turns.PlayerWon)
+            {
                 pm.AwardWinExp(enemyParty);
+                if (EncounterContext.ShouldReturnToWorld)
+                    QuestTracker.NotifyForestWin();
+            }
             if (_ui != null)
                 _ui.NoteRewards(pm.LastRewardSummary);
+            SaveService.Save(EncounterContext.ShouldReturnToWorld
+                ? EncounterContext.ReturnPosition
+                : (Vector3?)null);
 
             System.Action goHome = EncounterContext.ShouldReturnToWorld
                 ? () => StartCoroutine(ReturnToWorld())

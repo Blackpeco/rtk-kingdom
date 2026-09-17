@@ -12,6 +12,7 @@ namespace TsOnline
         void Start()
         {
             PartyManager.Ensure();
+            SaveService.HydrateIfNeeded();
             Invoke(nameof(Go), delay);
         }
 

@@ -20,12 +20,12 @@ namespace TsOnline
                 _open = !_open;
             else if (_open && Input.GetKeyDown(KeyCode.Escape))
                 _open = false;
-            PlayerWorldController.MenuOpen = _open;
+            PlayerWorldController.PartyMenuOpen = _open;
         }
 
         void OnDisable()
         {
-            PlayerWorldController.MenuOpen = false;
+            PlayerWorldController.PartyMenuOpen = false;
         }
 
         void OnGUI()
@@ -41,9 +41,9 @@ namespace TsOnline
         {
             int n = pm.Party.Count;
             float h = 28f + n * 22f;
-            GUI.Box(new Rect(16, 128, 420, h + 8), "");
-            GUI.Label(new Rect(24, 132, 400, 22), "ปาร์ตี้ (สูงสุด 5)  —  แถวนี้คือลำดับในโลก / AGI เรียงตาในรบ");
-            float y = 154f;
+            GUI.Box(new Rect(16, 168, 420, h + 8), "");
+            GUI.Label(new Rect(24, 172, 400, 22), "ปาร์ตี้ (สูงสุด 5)  —  แถวนี้คือลำดับในโลก / AGI เรียงตาในรบ");
+            float y = 194f;
             for (int i = 0; i < n; i++)
             {
                 PartyMember m = pm.Party[i];
@@ -61,7 +61,7 @@ namespace TsOnline
             }
 
             if (!string.IsNullOrEmpty(pm.LastRewardSummary) && EncounterContext.LastEnd == BattleEndKind.Win)
-                GUI.Label(new Rect(16, 128 + h + 12, 520, 22), pm.LastRewardSummary);
+                GUI.Label(new Rect(16, 168 + h + 12, 520, 22), pm.LastRewardSummary);
         }
 
         void DrawToggle(PartyManager pm)

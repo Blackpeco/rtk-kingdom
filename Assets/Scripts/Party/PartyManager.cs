@@ -204,6 +204,105 @@ namespace TsOnline
             return n;
         }
 
+        public void AwardFlatExp(int amount)
+        {
+            if (amount <= 0)
+                return;
+            int levels = 0;
+            for (int i = 0; i < Party.Count; i++)
+                levels += ExpLevelSystem.GrantExp(Party[i], amount);
+            LastExpAwarded = amount;
+            LastLevelsGained = levels;
+            LastRewardSummary = "ได้ EXP " + amount + (levels > 0 ? " — มีคนเลเวลอัพ" : "");
+        }
+
+        public SavedMember[] ExportRoster()
+        {
+            var list = new SavedMember[Roster.Count];
+            for (int i = 0; i < Roster.Count; i++)
+                list[i] = ToSaved(Roster[i]);
+            return list;
+        }
+
+        public string[] ExportPartyOrder()
+        {
+            var ids = new string[Party.Count];
+            for (int i = 0; i < Party.Count; i++)
+                ids[i] = Party[i] != null ? Party[i].Id : "";
+            return ids;
+        }
+
+        public void ApplySave(SavedMember[] saved, string[] order)
+        {
+            if (Roster.Count == 0)
+                BuildDefaultRoster();
+            if (saved != null)
+            {
+                for (int i = 0; i < saved.Length; i++)
+                {
+                    if (saved[i] == null)
+                        continue;
+                    PartyMember m = FindById(saved[i].id);
+                    if (m != null)
+                        FromSaved(m, saved[i]);
+                }
+            }
+
+            Party.Clear();
+            if (order != null)
+            {
+                for (int i = 0; i < order.Length && Party.Count < MaxParty; i++)
+                {
+                    PartyMember m = FindById(order[i]);
+                    if (m != null && !InParty(m))
+                        Party.Add(m);
+                }
+            }
+
+            if (Party.Count == 0)
+            {
+                for (int i = 0; i < DefaultPartyIds.Length; i++)
+                {
+                    PartyMember found = FindById(DefaultPartyIds[i]);
+                    if (found != null && !InParty(found))
+                        Party.Add(found);
+                }
+            }
+        }
+
+        static SavedMember ToSaved(PartyMember m)
+        {
+            var s = new SavedMember();
+            if (m == null)
+                return s;
+            s.id = m.Id;
+            s.level = m.level;
+            s.exp = m.exp;
+            s.unspentPoints = m.unspentPoints;
+            s.currentHp = m.currentHp;
+            s.currentSp = m.currentSp;
+            s.bonusHp = m.bonus.hp;
+            s.bonusSp = m.bonus.sp;
+            s.bonusAtk = m.bonus.atk;
+            s.bonusIntel = m.bonus.intel;
+            s.bonusDef = m.bonus.def;
+            s.bonusAgi = m.bonus.agi;
+            s.unlocked = m.unlocked;
+            return s;
+        }
+
+        static void FromSaved(PartyMember m, SavedMember s)
+        {
+            m.level = Mathf.Max(1, s.level);
+            m.exp = Mathf.Max(0, s.exp);
+            m.unspentPoints = Mathf.Max(0, s.unspentPoints);
+            m.bonus = new UnitStats(s.bonusHp, s.bonusSp, s.bonusAtk, s.bonusIntel, s.bonusDef, s.bonusAgi);
+            m.currentHp = s.currentHp;
+            m.currentSp = s.currentSp;
+            m.unlocked = s.unlocked;
+            m.ClampVitals();
+        }
+
         static UnitDefinition[] LoadGenerals()
         {
             string[] paths =

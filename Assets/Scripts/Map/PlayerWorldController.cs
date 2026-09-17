@@ -6,7 +6,13 @@ namespace TsOnline
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerWorldController : MonoBehaviour
     {
-        public static bool MenuOpen;
+        public static bool PartyMenuOpen;
+        public static bool DialogueOpen;
+
+        public static bool MenuOpen
+        {
+            get { return PartyMenuOpen || DialogueOpen; }
+        }
 
         public float moveSpeed = 4.2f;
         Rigidbody2D _body;

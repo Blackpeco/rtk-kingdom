@@ -126,7 +126,7 @@ namespace TsOnline
             if (_auto == null)
                 return;
             float x = Screen.width - 276f;
-            GUI.Box(new Rect(x, 8, 264, 92), "");
+            GUI.Box(new Rect(x, 8, 264, 118), "");
             GUI.Label(new Rect(x + 10, 12, 244, 20), "Auto Battle");
             _auto.AutoAttack = GUI.Toggle(new Rect(x + 10, 34, 120, 22), _auto.AutoAttack, "Auto Attack");
             _auto.AutoHeal = GUI.Toggle(new Rect(x + 130, 34, 120, 22), _auto.AutoHeal, "Auto Heal");
@@ -135,6 +135,9 @@ namespace TsOnline
                 _auto.HealThresholdPercent = Mathf.Max(10f, _auto.HealThresholdPercent - 10f);
             if (GUI.Button(new Rect(x + 210, 56, 36, 24), "+"))
                 _auto.HealThresholdPercent = Mathf.Min(100f, _auto.HealThresholdPercent + 10f);
+            GUI.Label(new Rect(x + 10, 86, 244, 22),
+                "ปาโต้เยา รักษาเหลือ " + PatoyoHelper.ChargesLeft + "/" + PatoyoHelper.MaxCharges
+                + "   สมุนไพร ×" + InventoryService.CountOf(InventoryService.HerbId));
         }
 
         void DrawLevelUp()
@@ -242,7 +245,7 @@ namespace TsOnline
             _partyHud = MakePanel(root.transform, "PartyHud", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(150, 0), new Vector2(280, 360));
             _enemyHud = MakePanel(root.transform, "EnemyHud", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-150, 0), new Vector2(280, 360));
 
-            _commands = MakePanel(root.transform, "Commands", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 52), new Vector2(760, 72));
+            _commands = MakePanel(root.transform, "Commands", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 52), new Vector2(920, 72));
             _skills = MakePanel(root.transform, "Skills", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 52), new Vector2(860, 72));
             _targets = MakePanel(root.transform, "Targets", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 52), new Vector2(860, 72));
         }
@@ -271,14 +274,20 @@ namespace TsOnline
             if (_turns.State == BattleState.AwaitingCommand && _turns.CurrentActor != null && _turns.CurrentActor.isPlayer)
             {
                 _commands.gameObject.SetActive(true);
+                bool patoyoOk = PatoyoHelper.ChargesLeft > 0;
+                bool herbOk = InventoryService.CountOf(InventoryService.HerbId) > 0;
                 LayoutButtons(_commands, new[]
                 {
                     Btn("โจมตีปกติ", new Color(0.55f, 0.28f, 0.22f), () => _turns.ChooseCommand(BattleCommand.Attack)),
                     Btn("สกิล", new Color(0.22f, 0.38f, 0.62f), () => _turns.ChooseCommand(BattleCommand.Skill)),
-                    Btn("ไอเทม", new Color(0.35f, 0.35f, 0.22f), () => _turns.ChooseCommand(BattleCommand.Item)),
+                    Btn("ปาโต้เยา", patoyoOk ? new Color(0.72f, 0.32f, 0.48f) : new Color(0.22f, 0.2f, 0.22f),
+                        () => _turns.ChooseCommand(BattleCommand.Patoyo)),
+                    Btn(herbOk ? "สมุนไพร ×" + InventoryService.CountOf(InventoryService.HerbId) : "ไอเทม",
+                        herbOk ? new Color(0.35f, 0.45f, 0.22f) : new Color(0.28f, 0.28f, 0.22f),
+                        () => _turns.ChooseCommand(BattleCommand.Item)),
                     Btn("ป้องกัน", new Color(0.25f, 0.45f, 0.32f), () => _turns.ChooseCommand(BattleCommand.Defend)),
                     Btn("หนี", new Color(0.28f, 0.28f, 0.32f), () => _turns.ChooseCommand(BattleCommand.Escape))
-                });
+                }, 118f);
             }
             else if (_turns.State == BattleState.AwaitingSkill && _turns.CurrentActor != null)
             {
@@ -416,9 +425,8 @@ namespace TsOnline
             return new BtnSpec { Label = label, Color = color, Click = click };
         }
 
-        void LayoutButtons(RectTransform parent, BtnSpec[] buttons)
+        void LayoutButtons(RectTransform parent, BtnSpec[] buttons, float width = 140f)
         {
-            float width = 140f;
             float gap = 10f;
             float total = buttons.Length * width + (buttons.Length - 1) * gap;
             float x = -total * 0.5f + width * 0.5f;

@@ -7,6 +7,7 @@ namespace TsOnline
         Skill = 2,
         Item = 3,
         Defend = 4,
-        Escape = 5
+        Escape = 5,
+        Patoyo = 6
     }
 }

@@ -13,6 +13,10 @@ namespace TsOnline
         public const float DefaultHealThresholdPercent = 40f;
         public const float ThinkDelay = 0.35f;
 
+        public static bool SavedAutoAttack;
+        public static bool SavedAutoHeal;
+        public static float SavedHealThreshold = DefaultHealThresholdPercent;
+
         public bool AutoAttack;
         public bool AutoHeal;
         public float HealThresholdPercent = DefaultHealThresholdPercent;
@@ -22,12 +26,25 @@ namespace TsOnline
 
         public void Bind(TurnManager turns)
         {
+            AutoAttack = SavedAutoAttack;
+            AutoHeal = SavedAutoHeal;
+            HealThresholdPercent = SavedHealThreshold > 0f ? SavedHealThreshold : DefaultHealThresholdPercent;
             _turns = turns;
             _turns.OnChanged += HandleChanged;
         }
 
+        void LateUpdate()
+        {
+            SavedAutoAttack = AutoAttack;
+            SavedAutoHeal = AutoHeal;
+            SavedHealThreshold = HealThresholdPercent;
+        }
+
         void OnDestroy()
         {
+            SavedAutoAttack = AutoAttack;
+            SavedAutoHeal = AutoHeal;
+            SavedHealThreshold = HealThresholdPercent;
             if (_turns != null)
                 _turns.OnChanged -= HandleChanged;
         }

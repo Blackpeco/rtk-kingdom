@@ -30,6 +30,7 @@ namespace TsOnline
 
             _used = consumeOnTrigger;
             EncounterContext.Begin(party, enemies, other.transform.position, encounterName);
+            SaveService.Save(other.transform.position);
             Debug.Log("[World] Encounter: " + encounterName);
             SceneManager.LoadScene("Battle");
         }
