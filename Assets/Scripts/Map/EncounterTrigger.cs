@@ -3,7 +3,11 @@ using UnityEngine.SceneManagement;
 
 namespace TsOnline
 {
-    /// <summary>Overlap with the player starts a Battle using EncounterContext.</summary>
+    /// <summary>
+    /// Overlap with the player starts a Battle using EncounterContext.
+    /// Skips while <see cref="PlayerWorldController.MenuOpen"/> (party panel or ยายเมือง dialog).
+    /// Wanderers may still roam; Stay retries after the menu closes.
+    /// </summary>
     public class EncounterTrigger : MonoBehaviour
     {
         public UnitDefinition[] enemies;
@@ -14,11 +18,23 @@ namespace TsOnline
 
         void OnTriggerEnter2D(Collider2D other)
         {
+            TryStart(other);
+        }
+
+        void OnTriggerStay2D(Collider2D other)
+        {
+            TryStart(other);
+        }
+
+        void TryStart(Collider2D other)
+        {
             if (_used)
                 return;
             if (other.GetComponent<PlayerWorldController>() == null)
                 return;
             if (WorldBootstrap.EncountersLocked)
+                return;
+            if (PlayerWorldController.MenuOpen)
                 return;
 
             UnitDefinition[] party = WorldParty.GetOrLoad();
