@@ -51,7 +51,7 @@ Persists: roster ids, party order, level / EXP / unspent / bonus stats / HP / SP
 2. Stop Play. Play **Boot**.
 3. You should be near that spot, quest `1/2`, same HP / level / points, Patoyo still following.
 
-**F9** mid-World reloads the file onto the current session (position included). It also clears leftover encounter Stay-retry flags (a `transform` teleport can skip Exit2D). Open **P** while a pack is overlapping, **F9** to a city save, close **P** — must **not** start Battle. Walk into a pack with menus closed still does.
+**F9** mid-World reloads the file onto the current session (position included). It also clears leftover encounter Stay-retry flags **and** ยายเมือง `_near` / `_talking` (a `transform` teleport can skip Exit2D). Open **P** while a pack is overlapping, **F9** to a city save, close **P** — must **not** start Battle. Walk into a pack with menus closed still does. Talk near grandma, **F9** to a forest save — no **กด E** prompt and no stuck dialog; **F9** onto grandma and **E** works again.
 
 ## Click-by-click
 
