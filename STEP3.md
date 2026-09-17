@@ -7,7 +7,7 @@ Offline only. No networking, gacha, save, or CharacterCreate flow.
 1. Open **`Assets/Scenes/World.unity`** (or Play `Boot.unity`, which loads World after a short delay).
 2. **WASD / arrow keys** move the gold player quad.
 3. **Left = เมือง (safe)**. **Right = ป่า**. Walk into a colored wandering monster.
-4. Battle starts with the **same 3 generals** vs that pack.
+4. Battle starts with the **same 3 generals** vs that pack. If the party panel (**P**) or ยายเมือง dialog (**E**) is open (`MenuOpen`), the overlap is ignored until you close the UI — wanderers still move.
 5. Win / lose / escape → after ~1.8s return to World, slightly left of the fight (grace 1.6s so you do not instantly re-trigger).
 
 Direct Play on `Battle.unity` still works as the Step 2 3v3 and **does not** return to World (no `EncounterContext`).

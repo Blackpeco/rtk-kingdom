@@ -58,7 +58,7 @@ Persists: roster ids, party order, level / EXP / unspent / bonus stats / HP / SP
 ### 1. Patoyo follows + battle help (full party)
 
 1. Play World. Walk — the pink circle trails the gold lead.
-2. **P** → add generals until 5 → close.
+2. **P** → add generals until 5 → close. (A wanderer touching you while P is open must **not** start Battle.)
 3. Touch a wanderer. Battle: 5 cards on the left, ปาโต้เยา at bottom-left.
 4. Take a hit. **ปาโต้เยา** → pick the wounded ally → pink `+22`. Repeat once more, then the button goes dark.
 

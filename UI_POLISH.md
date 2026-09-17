@@ -109,3 +109,4 @@ Play **Boot** (or World with a save). Check **1024×576**, **1280×720**, and **
 6. **F8** (closed party) or Boot wipe → CharacterCreate. Shrink height (~480): **เริ่มเดินทาง** stays below the hint; empty name still errors; confirm still starts World.
 7. Boot → create → wanderer → Battle commands / auto → return. F9 load. Sandbox **Battle.unity** then World must **not** fake LastEnd.
 8. **P** and ยายเมือง **E** are exclusive: party open → E does nothing and the quest dialog is not drawn; dialog open → P / ปาร์ตี้ does not open the panel. Close one (Esc / ปิด / ปิดปาร์ตี้), then the other works. WASD still locked while either is open. F5/F9/F8 hide-while-party unchanged.
+9. Forest wanderer must **not** start Battle while `MenuOpen` (party panel **or** ยายเมือง dialog). They still roam. Close the UI; if you are still overlapping, the fight starts (same save-on-enter / grace lock).
