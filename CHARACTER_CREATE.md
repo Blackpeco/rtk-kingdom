@@ -54,7 +54,7 @@ Any of:
 - Trash the JSON so `TryLoad` fails — Boot discards it and opens create.
 - Then Play **Boot** — create screen again.
 
-After a Battle-only win, **ดำเนินการต่อ** on the level-up panel writes the allocated points to the save (same as World return).
+After a Battle-only win, **ดำเนินการต่อ** allocates points **in memory only** — it does **not** write `ts_online_save.json`. That keeps the test 3v3 from overwriting a created-hero save. World encounters still save on battle end and again after **กลับโลก**.
 
 ## Files
 
