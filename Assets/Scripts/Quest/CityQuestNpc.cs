@@ -2,12 +2,18 @@ using UnityEngine;
 
 namespace TsOnline
 {
-    /// <summary>ยายเมือง — talk (E) to accept / turn in the one forest quest. Not shown while the party panel is open.</summary>
+    /// <summary>
+    /// ยายเมือง — talk (E) to accept / turn in the one forest quest. Not shown while the party panel is open.
+    /// F9 / any teleport can skip Exit2D; leftover <c>_near</c> / <c>_talking</c> clear when the player is
+    /// no longer geometrically overlapping, and when <see cref="ClearAllTalkState"/> runs.
+    /// Landing on her after a teleport re-arms proximity so E works without walking out and back in.
+    /// </summary>
     public class CityQuestNpc : MonoBehaviour
     {
         bool _near;
         bool _talking;
         string _line = "";
+        Collider2D _col;
 
         public static GameObject Spawn()
         {
@@ -24,20 +30,86 @@ namespace TsOnline
             return go;
         }
 
+        void Awake()
+        {
+            _col = GetComponent<Collider2D>();
+        }
+
         void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.GetComponent<PlayerWorldController>() != null)
+            if (other.GetComponent<PlayerWorldController>() == null)
+                return;
+            if (GeometricallyOverlaps(other))
                 _near = true;
+        }
+
+        void OnTriggerStay2D(Collider2D other)
+        {
+            if (other.GetComponent<PlayerWorldController>() == null)
+                return;
+            SyncProximity(other);
         }
 
         void OnTriggerExit2D(Collider2D other)
         {
-            if (other.GetComponent<PlayerWorldController>() != null)
+            if (other.GetComponent<PlayerWorldController>() == null)
+                return;
+            // Teleport can fire a bogus Exit while the player is already on her again.
+            if (GeometricallyOverlaps(other))
             {
-                _near = false;
-                _talking = false;
-                PlayerWorldController.DialogueOpen = false;
+                _near = true;
+                return;
             }
+
+            CloseTalkAndProximity();
+        }
+
+        void FixedUpdate()
+        {
+            Transform player = SaveService.FindPlayer();
+            Collider2D playerCol = player != null ? player.GetComponent<Collider2D>() : null;
+            SyncProximity(playerCol);
+        }
+
+        /// <summary>
+        /// Drop leftover talk / proximity after a teleport (F9 / <see cref="SaveService.TryApplyWorldPosition"/>).
+        /// Exit2D may not fire when <c>transform.position</c> jumps. Re-arms <c>_near</c> if the
+        /// player landed on grandma so E works without walking out and back.
+        /// </summary>
+        public static void ClearAllTalkState()
+        {
+            Transform player = SaveService.FindPlayer();
+            Collider2D playerCol = player != null ? player.GetComponent<Collider2D>() : null;
+            CityQuestNpc[] all = FindObjectsOfType<CityQuestNpc>();
+            for (int i = 0; i < all.Length; i++)
+            {
+                if (all[i] == null)
+                    continue;
+                all[i]._talking = false;
+                PlayerWorldController.DialogueOpen = false;
+                all[i].SyncProximity(playerCol);
+            }
+
+            if (all.Length == 0)
+                PlayerWorldController.DialogueOpen = false;
+        }
+
+        void SyncProximity(Collider2D playerCol)
+        {
+            if (GeometricallyOverlaps(playerCol))
+            {
+                _near = true;
+                return;
+            }
+
+            CloseTalkAndProximity();
+        }
+
+        void CloseTalkAndProximity()
+        {
+            _near = false;
+            _talking = false;
+            PlayerWorldController.DialogueOpen = false;
         }
 
         void Update()
@@ -123,6 +195,34 @@ namespace TsOnline
                 _talking = false;
                 PlayerWorldController.DialogueOpen = false;
             }
+        }
+
+        bool GeometricallyOverlaps(Collider2D other)
+        {
+            if (_col == null)
+                _col = GetComponent<Collider2D>();
+            if (_col == null || other == null)
+                return false;
+
+            var selfCircle = _col as CircleCollider2D;
+            var otherCircle = other as CircleCollider2D;
+            if (selfCircle != null && otherCircle != null)
+            {
+                Vector2 a = selfCircle.transform.TransformPoint(selfCircle.offset);
+                Vector2 b = otherCircle.transform.TransformPoint(otherCircle.offset);
+                float ar = selfCircle.radius * CircleScale(selfCircle.transform);
+                float br = otherCircle.radius * CircleScale(otherCircle.transform);
+                float r = ar + br;
+                return (a - b).sqrMagnitude <= r * r;
+            }
+
+            return _col.bounds.Intersects(other.bounds);
+        }
+
+        static float CircleScale(Transform t)
+        {
+            Vector3 s = t.lossyScale;
+            return Mathf.Max(Mathf.Abs(s.x), Mathf.Abs(s.y));
         }
 
         static string Greeting()

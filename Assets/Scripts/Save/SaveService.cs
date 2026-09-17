@@ -184,8 +184,9 @@ namespace TsOnline
             if (player == null || !PendingWorldPos.HasValue)
                 return false;
             player.position = PendingWorldPos.Value;
-            // F9 / load teleport can skip OnTriggerExit2D and leave Stay-retry flags armed.
+            // F9 / load teleport can skip OnTriggerExit2D and leave Stay-retry flags / grandma talk armed.
             EncounterTrigger.ClearAllDeferredByMenu();
+            CityQuestNpc.ClearAllTalkState();
             return true;
         }
 
