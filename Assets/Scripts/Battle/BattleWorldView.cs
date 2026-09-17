@@ -2,9 +2,21 @@ using UnityEngine;
 
 namespace TsOnline
 {
-    /// <summary>Colored quad placeholders: players left, enemies right.</summary>
+    /// <summary>Colored shape placeholders: players left (diamond), enemies right (square).</summary>
     public static class BattleWorldView
     {
+        public static void BuildArena()
+        {
+            PlaceFloor("AllyFloor", new Vector3(-5.2f, 0f, 1f), new Vector3(5.6f, 7.2f, 1f),
+                new Color(0.14f, 0.20f, 0.30f), 0);
+            PlaceFloor("EnemyFloor", new Vector3(5.2f, 0f, 1f), new Vector3(5.6f, 7.2f, 1f),
+                new Color(0.30f, 0.14f, 0.12f), 0);
+            PlaceFloor("MidLine", new Vector3(0f, 0f, 1f), new Vector3(0.16f, 7.2f, 1f),
+                new Color(0.55f, 0.52f, 0.40f), 1);
+            WorldArt.MakeLabel(null, "ฝ่ายเรา", new Vector3(-5.2f, 3.55f, 0f), new Color(0.70f, 0.88f, 1f), 0.16f, 26);
+            WorldArt.MakeLabel(null, "ศัตรู", new Vector3(5.2f, 3.55f, 0f), new Color(1f, 0.72f, 0.68f), 0.16f, 26);
+        }
+
         public static void AttachPlaceholder(BattleUnit unit, int slotIndex, int slotCount)
         {
             if (unit == null)
@@ -15,47 +27,24 @@ namespace TsOnline
             unit.transform.position = new Vector3(x, y, 0f);
 
             var sr = unit.gameObject.AddComponent<SpriteRenderer>();
-            sr.sprite = MakeQuad(unit.ElementColor());
+            Color col = unit.ElementColor();
+            sr.sprite = WorldArt.MakeShape(col, 22, unit.isPlayer ? WorldArt.Shape.Diamond : WorldArt.Shape.Square);
             sr.sortingOrder = 2;
             unit.body = sr;
 
-            var label = new GameObject("Label");
-            label.transform.SetParent(unit.transform, false);
-            label.transform.localPosition = new Vector3(0f, 0.85f, 0f);
-            var text = label.AddComponent<TextMesh>();
-            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            if (font == null)
-                font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            if (font != null)
-                text.font = font;
-            text.text = unit.ShortName;
-            text.characterSize = 0.18f;
-            text.anchor = TextAnchor.MiddleCenter;
-            text.alignment = TextAlignment.Center;
-            text.color = Color.white;
-            text.fontSize = 24;
+            WorldArt.MakeLabel(unit.transform, unit.ShortName, new Vector3(0f, 0.88f, 0f), Color.white, 0.15f, 24);
+            WorldArt.MakeLabel(unit.transform, CreatedHero.Thai(unit.Element), new Vector3(0f, 0.62f, 0f),
+                Color.Lerp(col, Color.white, 0.35f), 0.11f, 22);
         }
 
-        static Sprite MakeQuad(Color color)
+        static void PlaceFloor(string name, Vector3 pos, Vector3 scale, Color color, int sort)
         {
-            var tex = new Texture2D(16, 16, TextureFormat.RGBA32, false);
-            tex.filterMode = FilterMode.Point;
-            tex.wrapMode = TextureWrapMode.Clamp;
-            var pixels = new Color[16 * 16];
-            Color edge = color * 0.45f;
-            edge.a = 1f;
-            for (int y = 0; y < 16; y++)
-            {
-                for (int x = 0; x < 16; x++)
-                {
-                    bool border = x == 0 || y == 0 || x == 15 || y == 15;
-                    pixels[y * 16 + x] = border ? edge : color;
-                }
-            }
-
-            tex.SetPixels(pixels);
-            tex.Apply();
-            return Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f), 16f);
+            var go = new GameObject(name);
+            go.transform.position = pos;
+            go.transform.localScale = scale;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = WorldArt.MakeQuad(color, 12);
+            sr.sortingOrder = sort;
         }
     }
 }

@@ -35,6 +35,7 @@ namespace TsOnline
             public string text;
             public Color color;
             public float age;
+            public bool emphasis;
         }
 
         public void Bind(TurnManager turns, AutoBattleController auto = null)
@@ -47,12 +48,15 @@ namespace TsOnline
             {
                 if (unit == null)
                     return;
+                bool emphasis = !string.IsNullOrEmpty(text)
+                    && (text.IndexOf("ข่มธาตุ") >= 0 || text.IndexOf("ธาตุต้าน") >= 0);
                 _popups.Add(new Popup
                 {
-                    world = unit.transform.position + Vector3.up * 0.7f,
+                    world = unit.transform.position + Vector3.up * 0.75f,
                     text = text,
                     color = color,
-                    age = 0f
+                    age = 0f,
+                    emphasis = emphasis
                 });
             };
             BuildCanvas();
@@ -65,9 +69,9 @@ namespace TsOnline
             {
                 Popup p = _popups[i];
                 p.age += Time.deltaTime;
-                p.world += Vector3.up * Time.deltaTime * 0.6f;
+                p.world += Vector3.up * Time.deltaTime * (p.emphasis ? 0.75f : 0.6f);
                 _popups[i] = p;
-                if (p.age > 1.3f)
+                if (p.age > (p.emphasis ? 1.85f : 1.3f))
                     _popups.RemoveAt(i);
             }
         }
@@ -105,21 +109,28 @@ namespace TsOnline
 
             if (Camera.main == null)
                 return;
-            var style = new GUIStyle(GUI.skin.label)
-            {
-                fontSize = 22,
-                fontStyle = FontStyle.Bold,
-                alignment = TextAnchor.MiddleCenter
-            };
             for (int i = 0; i < _popups.Count; i++)
             {
                 Popup p = _popups[i];
                 Vector3 screen = Camera.main.WorldToScreenPoint(p.world);
                 if (screen.z < 0f)
                     continue;
-                style.normal.textColor = p.color;
                 float y = Screen.height - screen.y;
-                GUI.Label(new Rect(screen.x - 90f, y - 18f, 180f, 36f), p.text, style);
+                float w = p.emphasis ? 280f : 200f;
+                float h = p.emphasis ? 48f : 38f;
+                var rect = new Rect(screen.x - w * 0.5f, y - h * 0.5f, w, h);
+                if (p.emphasis)
+                    UiTheme.DrawFill(rect, new Color(0f, 0f, 0f, 0.62f));
+                var style = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = p.emphasis ? 30 : 24,
+                    fontStyle = FontStyle.Bold,
+                    alignment = TextAnchor.MiddleCenter
+                };
+                style.normal.textColor = new Color(0f, 0f, 0f, 0.85f);
+                GUI.Label(new Rect(rect.x + 2f, rect.y + 2f, rect.width, rect.height), p.text, style);
+                style.normal.textColor = p.color;
+                GUI.Label(rect, p.text, style);
             }
         }
 
@@ -127,34 +138,39 @@ namespace TsOnline
         {
             if (_auto == null)
                 return;
-            float x = Screen.width - 276f;
-            GUI.Box(new Rect(x, 8, 264, 118), "");
-            GUI.Label(new Rect(x + 10, 12, 244, 20), "Auto Battle");
-            _auto.AutoAttack = GUI.Toggle(new Rect(x + 10, 34, 120, 22), _auto.AutoAttack, "Auto Attack");
-            _auto.AutoHeal = GUI.Toggle(new Rect(x + 130, 34, 120, 22), _auto.AutoHeal, "Auto Heal");
-            GUI.Label(new Rect(x + 10, 58, 150, 22), "Heal ถ้า HP < " + Mathf.RoundToInt(_auto.HealThresholdPercent) + "%");
-            if (GUI.Button(new Rect(x + 168, 56, 36, 24), "−"))
+            float x = Screen.width - 320f;
+            UiTheme.DrawPanel(new Rect(x, 8, 308, 132));
+            GUI.Label(new Rect(x + 12, 12, 284, 26), "Auto Battle", UiTheme.Title());
+            var toggle = new GUIStyle(GUI.skin.toggle) { fontSize = 16 };
+            toggle.normal.textColor = Color.white;
+            toggle.onNormal.textColor = Color.white;
+            _auto.AutoAttack = GUI.Toggle(new Rect(x + 14, 44, 140, 26), _auto.AutoAttack, "Auto Attack", toggle);
+            _auto.AutoHeal = GUI.Toggle(new Rect(x + 164, 44, 130, 26), _auto.AutoHeal, "Auto Heal", toggle);
+            GUI.Label(new Rect(x + 14, 74, 170, 26), "Heal ถ้า HP < " + Mathf.RoundToInt(_auto.HealThresholdPercent) + "%", UiTheme.Body());
+            if (GUI.Button(new Rect(x + 196, 72, 44, 30), "−", UiTheme.Button()))
                 _auto.HealThresholdPercent = Mathf.Max(10f, _auto.HealThresholdPercent - 10f);
-            if (GUI.Button(new Rect(x + 210, 56, 36, 24), "+"))
+            if (GUI.Button(new Rect(x + 246, 72, 44, 30), "+", UiTheme.Button()))
                 _auto.HealThresholdPercent = Mathf.Min(100f, _auto.HealThresholdPercent + 10f);
-            GUI.Label(new Rect(x + 10, 86, 244, 22),
+            GUI.Label(new Rect(x + 14, 104, 284, 26),
                 "ปาโต้เยา รักษาเหลือ " + PatoyoHelper.ChargesLeft + "/" + PatoyoHelper.MaxCharges
-                + "   สมุนไพร ×" + InventoryService.CountOf(InventoryService.HerbId));
+                + "   สมุนไพร ×" + InventoryService.CountOf(InventoryService.HerbId),
+                UiTheme.Hint());
         }
 
         void DrawLevelUp()
         {
             PartyManager pm = PartyManager.Ensure();
-            float w = Mathf.Min(640f, Screen.width - 40f);
-            float h = 300f;
+            float w = Mathf.Min(680f, Screen.width - 40f);
+            float h = 320f;
             var box = new Rect((Screen.width - w) * 0.5f, Screen.height * 0.5f - h * 0.5f, w, h);
-            GUI.Box(box, "");
-            GUI.Label(new Rect(box.x + 16, box.y + 10, w - 32, 24),
-                string.IsNullOrEmpty(pm.LastRewardSummary) ? "เลเวลอัพ — แจกแต้มสถานะ" : pm.LastRewardSummary);
+            UiTheme.DrawPanel(box);
+            GUI.Label(new Rect(box.x + 16, box.y + 10, w - 32, 28),
+                string.IsNullOrEmpty(pm.LastRewardSummary) ? "เลเวลอัพ — แจกแต้มสถานะ" : pm.LastRewardSummary,
+                UiTheme.Title());
 
             if (pm.Party.Count == 0)
             {
-                if (GUI.Button(new Rect(box.x + w * 0.5f - 70, box.y + h - 48, 140, 36), ContinueLabel()))
+                if (GUI.Button(new Rect(box.x + w * 0.5f - 80, box.y + h - 52, 160, 40), ContinueLabel(), UiTheme.Button()))
                     FinishLevelUp();
                 return;
             }
@@ -165,42 +181,44 @@ namespace TsOnline
             {
                 PartyMember tab = pm.Party[i];
                 string t = tab.ShortName + (tab.unspentPoints > 0 ? " +" + tab.unspentPoints : "");
-                if (GUI.Button(new Rect(tabX, box.y + 40, 110, 28), t))
+                if (GUI.Button(new Rect(tabX, box.y + 44, 118, 32), t, UiTheme.Button()))
                     _levelPick = i;
-                tabX += 114;
+                tabX += 122;
             }
 
             PartyMember m = pm.Party[_levelPick];
             UnitStats s = m.EffectiveStats;
-            GUI.Label(new Rect(box.x + 16, box.y + 78, w - 32, 22),
+            GUI.Label(new Rect(box.x + 16, box.y + 86, w - 32, 24),
                 m.ShortName + " / " + m.ThaiName + "  Lv " + m.level
                 + "  EXP " + m.exp + "/" + ExpLevelSystem.ExpToNext(m.level)
-                + "  แต้ม " + m.unspentPoints);
-            GUI.Label(new Rect(box.x + 16, box.y + 102, w - 32, 22),
+                + "  แต้ม " + m.unspentPoints, UiTheme.Body());
+            GUI.Label(new Rect(box.x + 16, box.y + 112, w - 32, 24),
                 "HP " + m.currentHp + "/" + s.hp + "   SP " + m.currentSp + "/" + s.sp
-                + "   ATK " + s.atk + "  INT " + s.intel + "  DEF " + s.def + "  AGI " + s.agi);
+                + "   ATK " + s.atk + "  INT " + s.intel + "  DEF " + s.def + "  AGI " + s.agi,
+                UiTheme.Body());
 
             if (m.unspentPoints > 0)
             {
-                DrawAllocBtn(m, box.x + 16, box.y + 136, "HP +" + ExpLevelSystem.HpPerPoint, ExpLevelSystem.StatKind.Hp);
-                DrawAllocBtn(m, box.x + 116, box.y + 136, "SP +" + ExpLevelSystem.SpPerPoint, ExpLevelSystem.StatKind.Sp);
-                DrawAllocBtn(m, box.x + 216, box.y + 136, "ATK +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Atk);
-                DrawAllocBtn(m, box.x + 316, box.y + 136, "INT +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Intel);
-                DrawAllocBtn(m, box.x + 416, box.y + 136, "DEF +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Def);
-                DrawAllocBtn(m, box.x + 516, box.y + 136, "AGI +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Agi);
+                DrawAllocBtn(m, box.x + 16, box.y + 146, "HP +" + ExpLevelSystem.HpPerPoint, ExpLevelSystem.StatKind.Hp);
+                DrawAllocBtn(m, box.x + 124, box.y + 146, "SP +" + ExpLevelSystem.SpPerPoint, ExpLevelSystem.StatKind.Sp);
+                DrawAllocBtn(m, box.x + 232, box.y + 146, "ATK +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Atk);
+                DrawAllocBtn(m, box.x + 340, box.y + 146, "INT +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Intel);
+                DrawAllocBtn(m, box.x + 448, box.y + 146, "DEF +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Def);
+                DrawAllocBtn(m, box.x + 556, box.y + 146, "AGI +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Agi);
             }
             else
             {
-                GUI.Label(new Rect(box.x + 16, box.y + 140, w - 32, 28), "ขุนพลนี้ไม่มีแต้มเหลือ — เลือกแท็บอื่นหรือดำเนินการต่อ");
+                GUI.Label(new Rect(box.x + 16, box.y + 150, w - 32, 28),
+                    "ขุนพลนี้ไม่มีแต้มเหลือ — เลือกแท็บอื่นหรือดำเนินการต่อ", UiTheme.Hint());
             }
 
-            if (GUI.Button(new Rect(box.x + w * 0.5f - 80, box.y + h - 48, 160, 36), ContinueLabel()))
+            if (GUI.Button(new Rect(box.x + w * 0.5f - 90, box.y + h - 52, 180, 40), ContinueLabel(), UiTheme.Button()))
                 FinishLevelUp();
         }
 
         static void DrawAllocBtn(PartyMember m, float x, float y, string label, ExpLevelSystem.StatKind stat)
         {
-            if (GUI.Button(new Rect(x, y, 96, 32), label))
+            if (GUI.Button(new Rect(x, y, 100, 36), label, UiTheme.Button()))
                 ExpLevelSystem.SpendPoint(m, stat);
         }
 
@@ -241,18 +259,20 @@ namespace TsOnline
             scaler.referenceResolution = new Vector2(1600, 900);
             scaler.matchWidthOrHeight = 0.5f;
 
-            _banner = MakeText(root.transform, "Banner", 18, TextAnchor.MiddleCenter, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -28), new Vector2(900, 40));
+            _banner = MakeText(root.transform, "Banner", 22, TextAnchor.MiddleCenter, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -32), new Vector2(980, 44));
             _banner.fontStyle = FontStyle.Bold;
 
-            _logText = MakeText(root.transform, "Log", 13, TextAnchor.LowerLeft, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 118), new Vector2(980, 96));
-            _logText.color = new Color(0.85f, 0.88f, 0.9f);
+            _logText = MakeText(root.transform, "Log", 14, TextAnchor.LowerLeft, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 132), new Vector2(1000, 100));
+            _logText.color = new Color(0.88f, 0.90f, 0.93f);
 
-            _partyHud = MakePanel(root.transform, "PartyHud", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(150, 0), new Vector2(280, 360));
-            _enemyHud = MakePanel(root.transform, "EnemyHud", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-150, 0), new Vector2(280, 360));
+            _partyHud = MakePanel(root.transform, "PartyHud", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(168, 10), new Vector2(312, 400));
+            _partyHud.GetComponent<Image>().color = new Color(0.06f, 0.10f, 0.14f, 0.78f);
+            _enemyHud = MakePanel(root.transform, "EnemyHud", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-168, 10), new Vector2(312, 400));
+            _enemyHud.GetComponent<Image>().color = new Color(0.16f, 0.07f, 0.07f, 0.78f);
 
-            _commands = MakePanel(root.transform, "Commands", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 52), new Vector2(920, 72));
-            _skills = MakePanel(root.transform, "Skills", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 52), new Vector2(860, 72));
-            _targets = MakePanel(root.transform, "Targets", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 52), new Vector2(860, 72));
+            _commands = MakePanel(root.transform, "Commands", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 58), new Vector2(1080, 88));
+            _skills = MakePanel(root.transform, "Skills", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 58), new Vector2(1140, 88));
+            _targets = MakePanel(root.transform, "Targets", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 58), new Vector2(1140, 88));
         }
 
         void Rebuild()
@@ -265,8 +285,8 @@ namespace TsOnline
                 ? new Color(1f, 0.85f, 0.4f)
                 : Color.white;
 
-            RefreshHud(_partyHud, _turns.PlayerUnits);
-            RefreshHud(_enemyHud, _turns.EnemyUnits);
+            RefreshHud(_partyHud, _turns.PlayerUnits, true);
+            RefreshHud(_enemyHud, _turns.EnemyUnits, false);
             RefreshLog();
 
             ClearKids(_commands);
@@ -283,16 +303,16 @@ namespace TsOnline
                 bool herbOk = InventoryService.CountOf(InventoryService.HerbId) > 0;
                 LayoutButtons(_commands, new[]
                 {
-                    Btn("โจมตีปกติ", new Color(0.55f, 0.28f, 0.22f), () => _turns.ChooseCommand(BattleCommand.Attack)),
-                    Btn("สกิล", new Color(0.22f, 0.38f, 0.62f), () => _turns.ChooseCommand(BattleCommand.Skill)),
-                    Btn("ปาโต้เยา", patoyoOk ? new Color(0.72f, 0.32f, 0.48f) : new Color(0.22f, 0.2f, 0.22f),
+                    Btn("โจมตีปกติ", new Color(0.62f, 0.28f, 0.22f), () => _turns.ChooseCommand(BattleCommand.Attack)),
+                    Btn("สกิล", new Color(0.20f, 0.40f, 0.70f), () => _turns.ChooseCommand(BattleCommand.Skill)),
+                    Btn("ปาโต้เยา", patoyoOk ? new Color(0.78f, 0.30f, 0.50f) : new Color(0.22f, 0.2f, 0.22f),
                         () => _turns.ChooseCommand(BattleCommand.Patoyo)),
                     Btn(herbOk ? "สมุนไพร ×" + InventoryService.CountOf(InventoryService.HerbId) : "ไอเทม",
-                        herbOk ? new Color(0.35f, 0.45f, 0.22f) : new Color(0.28f, 0.28f, 0.22f),
+                        herbOk ? new Color(0.32f, 0.52f, 0.22f) : new Color(0.28f, 0.28f, 0.22f),
                         () => _turns.ChooseCommand(BattleCommand.Item)),
-                    Btn("ป้องกัน", new Color(0.25f, 0.45f, 0.32f), () => _turns.ChooseCommand(BattleCommand.Defend)),
-                    Btn("หนี", new Color(0.28f, 0.28f, 0.32f), () => _turns.ChooseCommand(BattleCommand.Escape))
-                }, 118f);
+                    Btn("ป้องกัน", new Color(0.22f, 0.50f, 0.36f), () => _turns.ChooseCommand(BattleCommand.Defend)),
+                    Btn("หนี", new Color(0.30f, 0.30f, 0.34f), () => _turns.ChooseCommand(BattleCommand.Escape))
+                }, 148f, 16f);
             }
             else if (_turns.State == BattleState.AwaitingSkill && _turns.CurrentActor != null)
             {
@@ -306,7 +326,7 @@ namespace TsOnline
                         continue;
                     bool ok = SkillSystem.CanUse(_turns.CurrentActor, skill);
                     string label = skill.displayName + "  SP " + skill.spCost;
-                    Color col = ok ? new Color(0.2f, 0.4f, 0.65f) : new Color(0.2f, 0.2f, 0.22f);
+                    Color col = ok ? new Color(0.20f, 0.42f, 0.72f) : new Color(0.2f, 0.2f, 0.22f);
                     SkillDefinition captured = skill;
                     list.Add(Btn(label, col, () =>
                     {
@@ -316,7 +336,7 @@ namespace TsOnline
                 }
 
                 list.Add(Btn("ยกเลิก", new Color(0.3f, 0.3f, 0.32f), () => _turns.CancelToCommands()));
-                LayoutButtons(_skills, list.ToArray());
+                LayoutButtons(_skills, list.ToArray(), 168f, 14f);
             }
             else if (_turns.State == BattleState.AwaitingTarget)
             {
@@ -326,32 +346,46 @@ namespace TsOnline
                 for (int i = 0; i < options.Count; i++)
                 {
                     BattleUnit unit = options[i];
-                    list.Add(Btn(unit.ShortName + "  HP " + unit.currentHp, unit.ElementColor() * 0.8f, () => _turns.ChooseTarget(unit)));
+                    list.Add(Btn(unit.ShortName + "  HP " + unit.currentHp, unit.ElementColor() * 0.85f, () => _turns.ChooseTarget(unit)));
                 }
 
                 list.Add(Btn("ยกเลิก", new Color(0.3f, 0.3f, 0.32f), () => _turns.CancelToCommands()));
-                LayoutButtons(_targets, list.ToArray());
+                LayoutButtons(_targets, list.ToArray(), 168f, 14f);
             }
         }
 
-        void RefreshHud(RectTransform root, List<BattleUnit> units)
+        void RefreshHud(RectTransform root, List<BattleUnit> units, bool playerSide)
         {
             ClearKids(root);
+            var header = MakeText(root, "Side", 16, TextAnchor.MiddleCenter,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -16), new Vector2(280, 24));
+            header.text = playerSide ? "ฝ่ายเรา" : "ศัตรู";
+            header.fontStyle = FontStyle.Bold;
+            header.color = playerSide ? new Color(0.70f, 0.88f, 1f) : new Color(1f, 0.72f, 0.68f);
+
             int n = units.Count;
-            float cardH = n >= 5 ? 70f : 100f;
-            float gap = n >= 5 ? 6f : 10f;
+            float cardH = n >= 5 ? 74f : 104f;
+            float gap = n >= 5 ? 8f : 12f;
             float total = n * cardH + Mathf.Max(0, n - 1) * gap;
             var rootRt = root.GetComponent<RectTransform>();
-            rootRt.sizeDelta = new Vector2(280, Mathf.Max(360f, total + 16f));
-            float y = total * 0.5f - cardH * 0.5f;
+            rootRt.sizeDelta = new Vector2(312, Mathf.Max(400f, total + 44f));
+            float y = total * 0.5f - cardH * 0.5f - 8f;
             for (int i = 0; i < units.Count; i++)
             {
                 BattleUnit unit = units[i];
-                var card = MakePanel(root, "Card" + i, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, y), new Vector2(260, cardH));
+                var card = MakePanel(root, "Card" + i, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, y), new Vector2(292, cardH));
                 var img = card.GetComponent<Image>();
                 img.color = unit != null && unit == _turns.CurrentActor
-                    ? new Color(0.18f, 0.22f, 0.16f, 0.92f)
-                    : new Color(0.08f, 0.09f, 0.11f, 0.82f);
+                    ? new Color(0.20f, 0.28f, 0.16f, 0.95f)
+                    : playerSide
+                        ? new Color(0.08f, 0.11f, 0.15f, 0.90f)
+                        : new Color(0.16f, 0.08f, 0.08f, 0.90f);
+
+                if (unit != null)
+                {
+                    var chip = MakePanel(card, "El", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18, -16), new Vector2(16, 16));
+                    chip.GetComponent<Image>().color = unit.ElementColor();
+                }
 
                 string lv = "";
                 if (unit != null && unit.isPlayer)
@@ -362,19 +396,19 @@ namespace TsOnline
                 }
 
                 string title = unit == null ? "-" : unit.ShortName + "  " + ThaiElement(unit.Element) + lv;
-                var name = MakeText(card, "N", 14, TextAnchor.MiddleLeft, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -16), new Vector2(240, 22));
+                var name = MakeText(card, "N", 16, TextAnchor.MiddleLeft, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(12, -16), new Vector2(250, 24));
                 name.text = title;
                 name.color = unit != null && unit.IsAlive ? Color.white : new Color(1f, 0.4f, 0.4f);
 
                 if (unit != null)
                 {
-                    float hpY = n >= 5 ? -34f : -40f;
-                    float spY = n >= 5 ? -54f : -68f;
-                    MakeBar(card, "HP", new Vector2(0, hpY), unit.currentHp, unit.stats.hp, new Color(0.75f, 0.22f, 0.22f), "HP " + unit.currentHp + "/" + unit.stats.hp);
-                    MakeBar(card, "SP", new Vector2(0, spY), unit.currentSp, Mathf.Max(1, unit.stats.sp), new Color(0.22f, 0.45f, 0.82f), "SP " + unit.currentSp + "/" + unit.stats.sp);
+                    float hpY = n >= 5 ? -38f : -44f;
+                    float spY = n >= 5 ? -58f : -72f;
+                    MakeBar(card, "HP", new Vector2(0, hpY), unit.currentHp, unit.stats.hp, UiTheme.Hp, "HP " + unit.currentHp + "/" + unit.stats.hp, 22f);
+                    MakeBar(card, "SP", new Vector2(0, spY), unit.currentSp, Mathf.Max(1, unit.stats.sp), UiTheme.Sp, "SP " + unit.currentSp + "/" + unit.stats.sp, 16f);
                     if (unit.isDefending)
                     {
-                        var d = MakeText(card, "D", 11, TextAnchor.MiddleRight, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-12, -16), new Vector2(80, 18));
+                        var d = MakeText(card, "D", 12, TextAnchor.MiddleRight, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-12, -16), new Vector2(80, 18));
                         d.text = "ป้องกัน";
                         d.color = new Color(0.6f, 0.95f, 0.7f);
                     }
@@ -384,15 +418,16 @@ namespace TsOnline
             }
         }
 
-        void MakeBar(Transform parent, string id, Vector2 pos, int current, int max, Color fill, string label)
+        void MakeBar(Transform parent, string id, Vector2 pos, int current, int max, Color fill, string label, float height)
         {
-            var bg = MakePanel((RectTransform)parent, id, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), pos, new Vector2(232, 18));
-            bg.GetComponent<Image>().color = new Color(0.12f, 0.12f, 0.14f, 1f);
+            var bg = MakePanel((RectTransform)parent, id, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), pos, new Vector2(260, height));
+            bg.GetComponent<Image>().color = id == "HP" ? UiTheme.HpBack : UiTheme.SpBack;
             float pct = max <= 0 ? 0f : Mathf.Clamp01(current / (float)max);
-            var bar = MakePanel(bg, "Fill", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(116f * pct, 0), new Vector2(232f * pct, 18));
+            var bar = MakePanel(bg, "Fill", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2((260f * pct) * 0.5f, 0), new Vector2(260f * pct, height));
             bar.GetComponent<Image>().color = fill;
-            var t = MakeText(bg, "L", 11, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(232, 18));
+            var t = MakeText(bg, "L", 12, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(260, height));
             t.text = label;
+            t.fontStyle = FontStyle.Bold;
         }
 
         void AppendLog(string line)
@@ -430,9 +465,8 @@ namespace TsOnline
             return new BtnSpec { Label = label, Color = color, Click = click };
         }
 
-        void LayoutButtons(RectTransform parent, BtnSpec[] buttons, float width = 140f)
+        void LayoutButtons(RectTransform parent, BtnSpec[] buttons, float width = 148f, float gap = 16f)
         {
-            float gap = 10f;
             float total = buttons.Length * width + (buttons.Length - 1) * gap;
             float x = -total * 0.5f + width * 0.5f;
             for (int i = 0; i < buttons.Length; i++)
@@ -440,7 +474,7 @@ namespace TsOnline
                 Button b = MakeButton(parent, buttons[i].Label, buttons[i].Color, buttons[i].Click);
                 var rt = b.GetComponent<RectTransform>();
                 rt.anchoredPosition = new Vector2(x, 0);
-                rt.sizeDelta = new Vector2(width, 48);
+                rt.sizeDelta = new Vector2(width, 60);
                 x += width + gap;
             }
         }
@@ -450,7 +484,7 @@ namespace TsOnline
             var go = new GameObject(label, typeof(RectTransform), typeof(Image), typeof(Button));
             go.transform.SetParent(parent, false);
             var rt = go.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(140, 48);
+            rt.sizeDelta = new Vector2(148, 60);
             go.GetComponent<Image>().color = color;
             var btn = go.GetComponent<Button>();
             var colors = btn.colors;
@@ -458,8 +492,9 @@ namespace TsOnline
             colors.pressedColor = color * 0.8f;
             btn.colors = colors;
             btn.onClick.AddListener(click);
-            var text = MakeText(go.transform, "T", 15, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(140, 48));
+            var text = MakeText(go.transform, "T", 17, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(148, 60));
             text.text = label;
+            text.fontStyle = FontStyle.Bold;
             text.raycastTarget = false;
             return btn;
         }
@@ -494,7 +529,7 @@ namespace TsOnline
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
             rt.sizeDelta = size;
-            go.GetComponent<Image>().color = new Color(0.06f, 0.07f, 0.09f, 0.55f);
+            go.GetComponent<Image>().color = new Color(0.06f, 0.07f, 0.09f, 0.62f);
             return rt;
         }
 
@@ -514,14 +549,7 @@ namespace TsOnline
 
         static string ThaiElement(ElementType e)
         {
-            switch (e)
-            {
-                case ElementType.Earth: return "ดิน";
-                case ElementType.Water: return "น้ำ";
-                case ElementType.Fire: return "ไฟ";
-                case ElementType.Wind: return "ลม";
-                default: return "-";
-            }
+            return CreatedHero.Thai(e);
         }
     }
 }

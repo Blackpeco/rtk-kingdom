@@ -250,6 +250,7 @@ SCRIPTS = [
     "Assets/Scripts/Party/PartyManager.cs",
     "Assets/Scripts/Party/PartyWorldUI.cs",
     "Assets/Scripts/Map/WorldArt.cs",
+    "Assets/Scripts/UI/UiTheme.cs",
     "Assets/Scripts/Map/CharacterCreateUI.cs",
     "Assets/Scripts/Map/PatoyoFollower.cs",
     "Assets/Scripts/Party/CreatedHero.cs",
@@ -800,6 +801,12 @@ def main() -> None:
     print("Generated Unity metas, assets, icons, and scenes.")
     print("Smoke test script guid:", smoke_guid)
     print("ElementDefinition guid:", element_script)
+    # Keep 32×32 symbol icons / chibi placeholders if the polish generator is present.
+    ph = ROOT / "tools" / "generate_placeholders.py"
+    if ph.exists():
+        import subprocess
+        import sys
+        subprocess.call([sys.executable, str(ph)])
 
 
 if __name__ == "__main__":

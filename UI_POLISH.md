@@ -1,0 +1,76 @@
+# UI polish — how to see it in the Editor
+
+Readability pass only. Formulas, save, Wind skip, LastEnd, and Steps 1–5 loops are unchanged. Offline; no networking.
+
+Play **`Assets/Scenes/Boot.unity`** after compile (or the scene named below). Game view **16:9** (e.g. 1600×900) matches the Battle scaler.
+
+## 1. CharacterCreate — element colors + stat scan
+
+1. Wipe a save if needed: World **เกมใหม่ / ลบเซฟ (F8)**, or delete `ts_online_save.json`.
+2. Play **Boot**. You should land on **สร้างตัวละคร**, not the city.
+3. Four **wide color buttons**: ดิน (brown) น้ำ (blue) ไฟ (red) ลม (green), Thai on top, English under.
+4. Click each element. The **stat strip** under the role line highlights the signature stats (Earth HP/DEF, Water SP/INT, Fire ATK, Wind AGI).
+5. Name + **เริ่มเดินทาง** still writes the lead and opens World (same `BeginNewGame` / save).
+
+## 2. World — ground, actors, HUD
+
+Play **World** (or Boot with a save).
+
+| What | How it should read |
+| --- | --- |
+| Ground | **Left city** = light cobble / warm stone. **Right forest** = deep green. Tan road in the middle. |
+| Zone chips | `เมือง (ปลอดภัย)` and `ป่า (สุ่มสู้)` on colored bars at the top of each side. |
+| Lead | **Diamond** tinted to the created element, label `ชื่อ` + `หัวหน้า · ธาตุ`. |
+| ปาโต้เยา | **Pink round blob** with a face, label `ปาโต้เยา`, still lerps behind the lead. |
+| ยายเมือง | **Purple triangle / robe**, label `ยายเมือง`. Near → **กด E เพื่อคุย**. |
+| Wanderers | Green **diamond** `หมาป่า`, red **square** `โจร`, blue **circle** `กบ`. Same packs / roam. |
+| Decor | Houses / well in the city, dark tree triangles in the forest (no colliders). |
+
+**WorldHUD** (top-left, larger type):
+
+- Name + Thai element in the element color
+- **Green HP** and **blue SP** strips for the lead
+- Controls hint, **quest line** (gold), last battle result
+- **บันทึก (F5) / โหลด (F9) / เกมใหม่ (F8)** larger on the right
+
+## 3. Party panel (P)
+
+1. Press **P** or **ปาร์ตี้ / เลเวลอัพ (P)** (top-right).
+2. World strip under the HUD: numbered rows, element color tick, **Lv** + **green HP**.
+3. Full panel: taller rows, **หัวหน้า** gold badge on the created lead (still no ออก), ▲ ▼ / เข้า / ออก unchanged.
+4. Alloc block: HP green, SP blue, same +HP/+SP/+ATK… buttons.
+
+## 4. Battle — sides, bars, commands, popups
+
+Play **Battle** (test 3v3) or walk into a wanderer.
+
+| What | How it should read |
+| --- | --- |
+| Arena | Cool floor **ฝ่ายเรา** (left), warm floor **ศัตรู** (right), gold mid line. |
+| Units | Players = **diamonds**, enemies = **squares**, element color + Thai ธาตุ under the name. ปาโต้เยา still bottom-left blob. |
+| HUD cards | Left / right columns with **ฝ่ายเรา / ศัตรู** headers. Color chip next to the name. **HP green**, **SP blue**, thicker bars. |
+| Commands | Larger, more spaced: โจมตีปกติ / สกิล / ปาโต้เยา / สมุนไพร / ป้องกัน / หนี. Same `ChooseCommand` wiring. |
+| Popups | Damage numbers bigger. **ข่มธาตุ!** gold + dark plate, **ธาตุต้าน** gray, longer linger. |
+| Auto | Top-right **Auto Battle** panel, larger toggles and Heal % − / +. |
+
+Advantage still comes from the existing formula (`E=1.25` / `E=0.80` in the log).
+
+## 5. Placeholders / icons
+
+Runtime actors still use generated sprites in `WorldArt` (Play Mode does not require the PNGs).
+
+On disk (overwrite in the Project window if you want to swap art later):
+
+- `Assets/Art/Icons/{earth,water,fire,wind}.png` — 32×32 symbol tiles (GUIDs kept so `ElementDefinition` refs stay valid)
+- `Assets/Art/Placeholders/` — `player_lead`, `patoyo`, `grandma`, `wolf`, `bandit`, `frog`, `city_tile`, `forest_tile`
+
+Regenerate: `python3 tools/generate_placeholders.py`
+
+## Must still work (do not treat as UI)
+
+- Steps 1–5 loops, CharacterCreate → World, encounter → Battle → return
+- `python3 tools/verify_formulas.py` → **PASS**
+- Wind skip (`QA: Force Wind skip`), F5 / F9 / F8, LastEnd line after a fight
+- Auto Attack / Auto Heal / Patoyo charges / Herb
+
+No 3D, no networking, no gacha.

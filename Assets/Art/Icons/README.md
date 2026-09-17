@@ -1,10 +1,11 @@
 # Element icons
 
-Four 8×8 PNG placeholders are already imported as Sprites:
+Four 32×32 PNG placeholders, imported as Sprites (GUIDs unchanged from the original 8×8 tiles):
 
-- `earth.png` — brown
-- `water.png` — blue
-- `fire.png` — red
-- `wind.png` — green
+- `earth.png` — brown + mountain (ดิน)
+- `water.png` — blue + drop (น้ำ)
+- `fire.png` — red + flame triangle (ไฟ)
+- `wind.png` — green + chevrons (ลม)
 
-To replace them in the Editor: paint 64×64 (or any square) colors, overwrite these files, then assign the Sprite on each `ElementDefinition` under `Assets/Data/Elements`.
+Assigned on each `ElementDefinition` under `Assets/Data/Elements`.  
+Regenerate: `python3 tools/generate_placeholders.py`
