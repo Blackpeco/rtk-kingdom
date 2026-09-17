@@ -22,7 +22,11 @@ namespace TsOnline
             PartyMember lead = PartyManager.Ensure().Party.Count > 0 ? PartyManager.Ensure().Party[0] : null;
             float boxW = Mathf.Min(720f, Screen.width - 280f);
             var box = new Rect(16, 12, boxW, UiTheme.WorldHudHeight);
-            UiTheme.DrawPanel(box);
+            Color accent = lead != null ? Color.Lerp(CreatedHero.ColorOf(lead.Element), UiTheme.Accent, 0.35f) : UiTheme.Accent;
+            UiTheme.DrawFramedPanel(box, UiTheme.Panel, accent);
+
+            if (lead != null)
+                UiTheme.DrawChip(new Rect(box.x + 14, box.y + 12, 18, 18), CreatedHero.ColorOf(lead.Element));
 
             string leadTitle = lead != null
                 ? lead.ShortName + "   " + CreatedHero.Thai(lead.Element)
@@ -30,7 +34,7 @@ namespace TsOnline
             var title = new GUIStyle(UiTheme.Title());
             if (lead != null)
                 title.normal.textColor = Color.Lerp(CreatedHero.ColorOf(lead.Element), Color.white, 0.35f);
-            GUI.Label(new Rect(box.x + 14, box.y + 8, box.width - 28, 28), leadTitle, title);
+            GUI.Label(new Rect(box.x + 38, box.y + 8, box.width - 52, 28), leadTitle, title);
 
             if (lead != null)
             {
@@ -74,12 +78,7 @@ namespace TsOnline
             // clicks at 1024×576 / 1280×720. F5 / F9 / F8 keys in Update still work.
             if (PlayerWorldController.PartyMenuOpen)
             {
-                if (!string.IsNullOrEmpty(SaveService.LastMessage)
-                    && Time.realtimeSinceStartup - SaveService.LastMessageAt < 2.5f)
-                {
-                    GUI.Label(new Rect(Screen.width - 268, 56, 248, 24), SaveService.LastMessage, UiTheme.Hint());
-                }
-
+                DrawSaveToast(true);
                 return;
             }
 
@@ -94,11 +93,24 @@ namespace TsOnline
             if (GUI.Button(new Rect(sx, 98, 248, 34), "เกมใหม่ / ลบเซฟ (F8)", UiTheme.Button()))
                 SaveService.ResetRuntimeAndCreate();
 
-            if (!string.IsNullOrEmpty(SaveService.LastMessage)
-                && Time.realtimeSinceStartup - SaveService.LastMessageAt < 2.5f)
+            DrawSaveToast(false);
+        }
+
+        static void DrawSaveToast(bool partyOpen)
+        {
+            if (string.IsNullOrEmpty(SaveService.LastMessage)
+                || Time.realtimeSinceStartup - SaveService.LastMessageAt >= 2.5f)
+                return;
+
+            if (partyOpen)
             {
-                GUI.Label(new Rect(sx, 136, 248, 24), SaveService.LastMessage, UiTheme.Hint());
+                // Bottom-left so the toast is not lost under the P toggle.
+                float tw = Mathf.Min(440f, Screen.width - 32f);
+                UiTheme.DrawToast(new Rect(16, Screen.height - 42, tw, 34), SaveService.LastMessage);
+                return;
             }
+
+            UiTheme.DrawToast(new Rect(Screen.width - 268f, 136, 248, 28), SaveService.LastMessage);
         }
     }
 }

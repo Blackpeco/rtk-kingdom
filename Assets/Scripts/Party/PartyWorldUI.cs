@@ -57,11 +57,12 @@ namespace TsOnline
             float h = 34f + n * rowH;
             float top = UiTheme.WorldHudBottom;
             var box = new Rect(16, top, 460, h + 10);
-            UiTheme.DrawPanel(box);
-            GUI.Label(new Rect(box.x + 10, box.y + 6, 440, 22),
+            UiTheme.DrawFramedPanel(box, UiTheme.Panel, UiTheme.Accent);
+            GUI.Label(new Rect(box.x + 12, box.y + 6, 436, 22),
                 "ปาร์ตี้ (สูงสุด 5)  —  แถวนี้คือลำดับในโลก / AGI เรียงตาในรบ", UiTheme.Hint());
             var line = new GUIStyle(UiTheme.Body()) { fontSize = 15, wordWrap = false };
             float y = box.y + 32f;
+            var barLabel = new GUIStyle(UiTheme.Tiny()) { fontSize = 11 };
             for (int i = 0; i < n; i++)
             {
                 PartyMember m = pm.Party[i];
@@ -69,18 +70,21 @@ namespace TsOnline
                     continue;
                 UnitStats s = m.EffectiveStats;
                 Color el = CreatedHero.ColorOf(m.Element);
-                UiTheme.DrawFill(new Rect(box.x + 8, y + 4, 8, 18), el);
+                if (i % 2 == 0)
+                    UiTheme.DrawFill(new Rect(box.x + 6, y, box.width - 12, rowH - 2), new Color(1f, 1f, 1f, 0.04f));
+                UiTheme.DrawChip(new Rect(box.x + 10, y + 5, 14, 14), el);
                 string names = m.IsCreatedLead
                     ? m.ShortName + "  " + CreatedHero.Thai(m.Element)
                     : m.ShortName + " / " + m.ThaiName;
-                GUI.Label(new Rect(box.x + 22, y, 250, 24),
-                    UiTheme.Ellipsis((i + 1) + ". " + names, line, 250f), line);
-                var vitals = new GUIStyle(UiTheme.Tiny()) { alignment = TextAnchor.MiddleLeft, fontSize = 14 };
-                vitals.normal.textColor = UiTheme.Hp;
-                GUI.Label(new Rect(box.x + 272, y, 180, 24),
-                    "Lv" + m.level + "   HP " + m.currentHp + "/" + s.hp
-                    + (m.unspentPoints > 0 ? "  +" + m.unspentPoints : ""),
-                    vitals);
+                GUI.Label(new Rect(box.x + 28, y, 200, 24),
+                    UiTheme.Ellipsis((i + 1) + ". " + names, line, 200f), line);
+                var lv = new GUIStyle(UiTheme.Tiny()) { alignment = TextAnchor.MiddleLeft, fontSize = 13 };
+                GUI.Label(new Rect(box.x + 228, y, 44, 24), "Lv" + m.level, lv);
+                UiTheme.DrawBar(new Rect(box.x + 272, y + 5, 120, 16),
+                    m.currentHp, s.hp, UiTheme.Hp, UiTheme.HpBack,
+                    m.currentHp + "/" + s.hp, barLabel);
+                if (m.unspentPoints > 0)
+                    GUI.Label(new Rect(box.x + 396, y, 50, 24), "+" + m.unspentPoints, lv);
                 y += rowH;
             }
 
@@ -102,7 +106,7 @@ namespace TsOnline
             float w = Mathf.Min(960f, Screen.width - 32f);
             float h = Mathf.Min(620f, Screen.height - 40f);
             var box = new Rect((Screen.width - w) * 0.5f, (Screen.height - h) * 0.5f, w, h);
-            UiTheme.DrawPanel(box);
+            UiTheme.DrawFramedPanel(box, UiTheme.Panel, UiTheme.LeadGold);
             GUI.Label(new Rect(box.x + 18, box.y + 8, w - 36, 26), "ปาร์ตี้", UiTheme.Title());
             GUI.Label(new Rect(box.x + 18, box.y + 34, w - 36, 22),
                 "สลับลำดับ / เพิ่มจาก 6 ขุนพล · หัวหน้าเอาออกไม่ได้ · ตาในรบเรียง AGI",
@@ -135,21 +139,20 @@ namespace TsOnline
             {
                 PartyMember m = pm.Party[i];
                 float rowY = i * 42;
+                bool selected = m != null && RosterIndex(pm, m) == _selected;
+                UiTheme.DrawFill(new Rect(0, rowY, inner, 40),
+                    selected ? new Color(0.28f, 0.22f, 0.10f, 0.55f)
+                    : (i % 2 == 0 ? new Color(1f, 1f, 1f, 0.04f) : new Color(0f, 0f, 0f, 0.10f)));
                 if (m != null)
-                    UiTheme.DrawFill(new Rect(2, rowY + 6, 8, 26), CreatedHero.ColorOf(m.Element));
-                if (GUI.Button(new Rect(14, rowY, inner - 184, 38), LineLabel(m, true), UiTheme.Button()))
+                    UiTheme.DrawChip(new Rect(2, rowY + 10, 16, 16), CreatedHero.ColorOf(m.Element));
+                if (GUI.Button(new Rect(22, rowY, inner - 192, 38), LineLabel(m, true), UiTheme.Button()))
                     _selected = RosterIndex(pm, m);
                 if (GUI.Button(new Rect(inner - 166, rowY, 46, 38), "▲", UiTheme.Button()))
                     pm.MoveParty(i, -1);
                 if (GUI.Button(new Rect(inner - 116, rowY, 46, 38), "▼", UiTheme.Button()))
                     pm.MoveParty(i, 1);
                 if (m != null && m.IsCreatedLead)
-                {
-                    UiTheme.DrawFill(new Rect(inner - 66, rowY + 4, 56, 30), new Color(0.72f, 0.52f, 0.12f, 0.95f));
-                    var badge = new GUIStyle(UiTheme.Tiny()) { fontStyle = FontStyle.Bold, fontSize = 12 };
-                    badge.normal.textColor = UiTheme.LeadGold;
-                    GUI.Label(new Rect(inner - 66, rowY + 4, 56, 30), "หัวหน้า", badge);
-                }
+                    DrawLeadBadge(new Rect(inner - 66, rowY + 4, 56, 30));
                 else if (GUI.Button(new Rect(inner - 66, rowY, 56, 38), "ออก", UiTheme.Button()))
                     pm.TryRemoveFromParty(m);
             }
@@ -168,8 +171,14 @@ namespace TsOnline
                 PartyMember m = pm.Roster[i];
                 float rowY = i * 42;
                 bool inParty = pm.InParty(m);
+                bool selected = i == _selected;
+                UiTheme.DrawFill(new Rect(0, rowY, inner, 40),
+                    selected ? new Color(0.28f, 0.22f, 0.10f, 0.55f)
+                    : (i % 2 == 0 ? new Color(1f, 1f, 1f, 0.04f) : new Color(0f, 0f, 0f, 0.10f)));
+                if (m != null)
+                    UiTheme.DrawChip(new Rect(2, rowY + 10, 16, 16), CreatedHero.ColorOf(m.Element));
                 string extra = inParty ? "  [ในปาร์ตี้]" : "";
-                if (GUI.Button(new Rect(0, rowY, inner - 96, 38), LineLabel(m, false) + extra, UiTheme.Button()))
+                if (GUI.Button(new Rect(22, rowY, inner - 118, 38), LineLabel(m, false) + extra, UiTheme.Button()))
                     _selected = i;
                 if (!inParty && GUI.Button(new Rect(inner - 92, rowY, 88, 38), "เข้า", UiTheme.Button()))
                     pm.TryAddToParty(m);
@@ -180,7 +189,7 @@ namespace TsOnline
 
         void DrawAlloc(PartyManager pm, Rect area, bool wrapStats)
         {
-            UiTheme.DrawPanel(area, new Color(0.09f, 0.10f, 0.13f, 0.96f));
+            UiTheme.DrawFramedPanel(area, new Color(0.09f, 0.10f, 0.13f, 0.96f), UiTheme.Accent);
             PartyMember m = Selected(pm);
             if (m == null)
             {
@@ -199,15 +208,14 @@ namespace TsOnline
                     nameStyle, area.width - 28),
                 nameStyle);
 
-            var hp = new GUIStyle(UiTheme.Body());
-            hp.normal.textColor = UiTheme.Hp;
-            GUI.Label(new Rect(area.x + 14, area.y + 36, 220, 24),
-                "HP " + m.currentHp + "/" + s.hp, hp);
-            var sp = new GUIStyle(UiTheme.Body());
-            sp.normal.textColor = UiTheme.Sp;
-            GUI.Label(new Rect(area.x + 230, area.y + 36, 160, 24),
-                "SP " + m.currentSp + "/" + s.sp, sp);
-            GUI.Label(new Rect(area.x + 400, area.y + 36, Mathf.Max(80f, area.width - 420), 24),
+            var barLabel = new GUIStyle(UiTheme.Tiny()) { alignment = TextAnchor.MiddleCenter, fontSize = 12 };
+            UiTheme.DrawBar(new Rect(area.x + 14, area.y + 34, 200, 18),
+                m.currentHp, s.hp, UiTheme.Hp, UiTheme.HpBack,
+                "HP " + m.currentHp + "/" + s.hp, barLabel);
+            UiTheme.DrawBar(new Rect(area.x + 222, area.y + 34, 170, 18),
+                m.currentSp, Mathf.Max(1, s.sp), UiTheme.Sp, UiTheme.SpBack,
+                "SP " + m.currentSp + "/" + s.sp, barLabel);
+            GUI.Label(new Rect(area.x + 400, area.y + 32, Mathf.Max(80f, area.width - 420), 24),
                 "ATK " + s.atk + "  INT " + s.intel + "  DEF " + s.def + "  AGI " + s.agi, UiTheme.Body());
 
             if (m.unspentPoints <= 0)
@@ -241,6 +249,15 @@ namespace TsOnline
             DrawStatBtn(m, area.x + 14 + cell * 2, btnY + 40, "AGI +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Agi, cell - 8f);
             GUI.Label(new Rect(area.x + 14, area.y + 152, area.width - 28, 36),
                 "แต้มเข้าสู่สมาชิกปาร์ตี้ทันที — รบครั้งถัดไปใช้ค่าสถานะใหม่ (รวม HP/SP ปัจจุบัน)", UiTheme.Hint());
+        }
+
+        static void DrawLeadBadge(Rect r)
+        {
+            UiTheme.DrawFill(r, new Color(0.20f, 0.15f, 0.05f, 0.96f));
+            UiTheme.DrawBorder(r, UiTheme.LeadGold, 2f);
+            var badge = new GUIStyle(UiTheme.Tiny()) { fontStyle = FontStyle.Bold, fontSize = 12 };
+            badge.normal.textColor = UiTheme.LeadGold;
+            GUI.Label(r, "หัวหน้า", badge);
         }
 
         static void DrawStatBtn(PartyMember m, float x, float y, string label, ExpLevelSystem.StatKind stat, float width = 110f)
