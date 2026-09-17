@@ -221,6 +221,7 @@ namespace TsOnline
             AutoBattleController.SavedAutoHeal = false;
             AutoBattleController.SavedHealThreshold = AutoBattleController.DefaultHealThresholdPercent;
             EncounterContext.ResetSession();
+            PendingWorldPos = null;
         }
 
         public static void ResetRuntimeAndCreate()
