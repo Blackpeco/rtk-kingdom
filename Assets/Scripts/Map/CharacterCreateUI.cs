@@ -27,39 +27,54 @@ namespace TsOnline
             var box = new Rect((Screen.width - w) * 0.5f, (Screen.height - h) * 0.5f, w, h);
             UiTheme.DrawPanel(box);
 
-            GUI.Label(new Rect(box.x + 28, box.y + 16, w - 56, 32), "สร้างตัวละคร", UiTheme.Title());
-            GUI.Label(new Rect(box.x + 28, box.y + 56, 80, 28), "ชื่อ", UiTheme.Body());
-            var field = new GUIStyle(GUI.skin.textField) { fontSize = 18 };
-            _name = GUI.TextField(new Rect(box.x + 110, box.y + 54, w - 154, 32), _name ?? "", field);
+            // Bottom-anchored confirm + hint so the button never sits on the copy on short Game views.
+            float confirmY = box.y + h - 56;
+            bool hasErr = !string.IsNullOrEmpty(_error);
+            float errY = hasErr ? confirmY - 30 : confirmY;
+            float hintY = errY - 44;
+            float topEnd = hintY - 8;
 
-            GUI.Label(new Rect(box.x + 28, box.y + 100, w - 56, 24), "เลือกธาตุ", UiTheme.Body());
+            GUI.Label(new Rect(box.x + 28, box.y + 12, w - 56, 28), "สร้างตัวละคร", UiTheme.Title());
+            GUI.Label(new Rect(box.x + 28, box.y + 46, 80, 28), "ชื่อ", UiTheme.Body());
+            var field = new GUIStyle(GUI.skin.textField) { fontSize = 18 };
+            _name = GUI.TextField(new Rect(box.x + 110, box.y + 44, w - 154, 32), _name ?? "", field);
+
+            GUI.Label(new Rect(box.x + 28, box.y + 84, w - 56, 22), "เลือกธาตุ", UiTheme.Body());
+
+            float elY = box.y + 108;
+            float leftover = Mathf.Max(120f, topEnd - elY);
+            float statH = leftover < 180f ? 56f : 72f;
+            float roleH = 24f;
+            float elH = Mathf.Clamp(leftover - statH - roleH - 14f, 56f, 96f);
+            float roleY = elY + elH + 6;
+            float statY = roleY + roleH + 4;
 
             float btnW = (w - 80f) / 4f;
             for (int i = 0; i < Choices.Length; i++)
             {
                 ElementType el = Choices[i];
-                var r = new Rect(box.x + 28 + i * (btnW + 8), box.y + 128, btnW, 96);
+                var r = new Rect(box.x + 28 + i * (btnW + 8), elY, btnW, elH);
                 DrawElementButton(r, el);
             }
 
             UnitStats s = CreatedHero.StatsFor(_element);
             var role = new GUIStyle(UiTheme.Title()) { fontSize = 20 };
             role.normal.textColor = Color.Lerp(CreatedHero.ColorOf(_element), Color.white, 0.35f);
-            GUI.Label(new Rect(box.x + 28, box.y + 240, w - 56, 28), CreatedHero.RoleBlurb(_element), role);
+            GUI.Label(new Rect(box.x + 28, roleY, w - 56, roleH), CreatedHero.RoleBlurb(_element), role);
 
-            DrawStatRow(box.x + 28, box.y + 280, w - 56, s, _element);
+            DrawStatRow(box.x + 28, statY, w - 56, s, _element, statH);
 
-            GUI.Label(new Rect(box.x + 28, box.y + 368, w - 56, 44),
+            GUI.Label(new Rect(box.x + 28, hintY, w - 56, 40),
                 "ตัวนี้เป็นหัวหน้าปาร์ตี้  ขุนพล 6 คนยังปลดล็อกในแผงปาร์ตี้ (P) ภายหลัง", UiTheme.Hint());
 
-            if (!string.IsNullOrEmpty(_error))
+            if (hasErr)
             {
                 var err = new GUIStyle(UiTheme.Body());
                 err.normal.textColor = new Color(1f, 0.45f, 0.4f);
-                GUI.Label(new Rect(box.x + 28, box.y + 416, w - 56, 26), _error, err);
+                GUI.Label(new Rect(box.x + 28, errY, w - 56, 26), _error, err);
             }
 
-            if (GUI.Button(new Rect(box.x + w * 0.5f - 110, box.y + h - 64, 220, 46), "เริ่มเดินทาง", UiTheme.Button()))
+            if (GUI.Button(new Rect(box.x + w * 0.5f - 110, confirmY, 220, 46), "เริ่มเดินทาง", UiTheme.Button()))
                 Confirm();
         }
 
@@ -76,21 +91,21 @@ namespace TsOnline
 
             var thai = new GUIStyle(UiTheme.Title())
             {
-                fontSize = 26,
+                fontSize = r.height < 80f ? 22 : 26,
                 alignment = TextAnchor.MiddleCenter
             };
             thai.normal.textColor = Color.white;
             var en = new GUIStyle(UiTheme.Hint()) { alignment = TextAnchor.MiddleCenter, fontSize = 14 };
-            GUI.Label(new Rect(r.x, r.y + 10, r.width, 36), CreatedHero.Thai(el), thai);
-            GUI.Label(new Rect(r.x, r.y + 44, r.width, 22), CreatedHero.English(el), en);
+            GUI.Label(new Rect(r.x, r.y + 8, r.width, 32), CreatedHero.Thai(el), thai);
+            GUI.Label(new Rect(r.x, r.y + r.height * 0.48f, r.width, 20), CreatedHero.English(el), en);
             if (selected)
-                GUI.Label(new Rect(r.x, r.y + 66, r.width, 22), "▸ เลือกแล้ว", en);
+                GUI.Label(new Rect(r.x, r.y + r.height - 22, r.width, 20), "▸ เลือกแล้ว", en);
 
             if (GUI.Button(r, GUIContent.none, GUIStyle.none))
                 _element = el;
         }
 
-        static void DrawStatRow(float x, float y, float width, UnitStats s, ElementType el)
+        static void DrawStatRow(float x, float y, float width, UnitStats s, ElementType el, float height = 72f)
         {
             string[] names = { "HP", "SP", "ATK", "INT", "DEF", "AGI" };
             int[] vals = { s.hp, s.sp, s.atk, s.intel, s.def, s.agi };
@@ -106,17 +121,17 @@ namespace TsOnline
             float cell = width / 6f;
             for (int i = 0; i < 6; i++)
             {
-                var r = new Rect(x + i * cell, y, cell - 8f, 72f);
+                var r = new Rect(x + i * cell, y, cell - 8f, height);
                 Color bg = hot[i]
                     ? Color.Lerp(CreatedHero.ColorOf(el), new Color(0.12f, 0.12f, 0.14f), 0.45f)
                     : new Color(0.12f, 0.13f, 0.16f, 0.95f);
                 UiTheme.DrawFill(r, bg);
                 var name = new GUIStyle(UiTheme.Hint()) { alignment = TextAnchor.MiddleCenter, fontSize = 14 };
-                var val = new GUIStyle(UiTheme.Title()) { alignment = TextAnchor.MiddleCenter, fontSize = 22 };
+                var val = new GUIStyle(UiTheme.Title()) { alignment = TextAnchor.MiddleCenter, fontSize = height < 64f ? 18 : 22 };
                 if (hot[i])
                     val.normal.textColor = Color.white;
-                GUI.Label(new Rect(r.x, r.y + 6, r.width, 22), names[i], name);
-                GUI.Label(new Rect(r.x, r.y + 28, r.width, 36), vals[i].ToString(), val);
+                GUI.Label(new Rect(r.x, r.y + 4, r.width, 20), names[i], name);
+                GUI.Label(new Rect(r.x, r.y + height * 0.38f, r.width, height * 0.55f), vals[i].ToString(), val);
             }
         }
 

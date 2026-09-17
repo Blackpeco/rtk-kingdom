@@ -37,6 +37,7 @@ Missing icons: **Tools → TS Online → Create Default Data Assets**.
 ## Verify
 
 **Formulas:** `python3 tools/verify_formulas.py`  
+**HUD / party clip:** `python3 tools/verify_ui_layout.py` — then the Editor clicks in **[UI_POLISH.md](UI_POLISH.md)** §6 (P open hides F5/F9/F8 buttons; keys still work).  
 **Create:** Boot with no save → name + ดิน/น้ำ/ไฟ/ลม → World HUD shows that name  
 **World / Battle:** Patoyo, quest, F5/F9, auto battle. Direct `Battle.unity` stays the test 3v3, does not write the player save, and does not fake a World return via leftover `LastEnd`.
 

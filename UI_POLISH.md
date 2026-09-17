@@ -74,3 +74,33 @@ Regenerate: `python3 tools/generate_placeholders.py`
 - Auto Attack / Auto Heal / Patoyo charges / Herb
 
 No 3D, no networking, no gacha.
+
+## 6. Layout bugfix (party vs F5/F9/F8 + text clip)
+
+After the readability pass, two layout issues were fixed. Gameplay / save / LastEnd / formulas are unchanged.
+
+### Before → after
+
+| Issue | Before | After |
+| --- | --- | --- |
+| Party open + short Game view | WorldHUD **บันทึก / โหลด / เกมใหม่** sat on the party modal. At **1024×576**, F8 could steal **เข้า** (wipe save). | Those three **GUI.Button**s are **not drawn** while `PartyMenuOpen`. **F5 / F9 / F8 keys still work.** Toast may still show under the P button (label only). |
+| Party header | Title 22px in a 28px row wrapped and lost “ตาในรบเรียง AGI”. | Title “ปาร์ตี้” + Hint subtitle with the full clause. |
+| HUD hint | One 22px line; WASD copy wrapped into the gold quest band. | Two reserved lines; shorter copy. HUD is 188px, party strip starts at 208. |
+| Party strip names | Long 16-char names spilled into Lv/HP. | Ellipsis in the 250px name column. |
+| ยายเมือง dialog | Fixed 560px — off-screen under ~560 width. | `min(560, Screen.width-40)`, buttons shrink. |
+| CharacterCreate | **เริ่มเดินทาง** sat on the hint on short heights. | Confirm + hint + error are bottom-anchored; element/stat block shrinks. |
+| Alloc +stat row | Six 110px buttons clipped under ~740px panel width; roster could cover alloc on short heights. | Wrap to 2×3 when narrow; party/roster lists scroll above alloc. |
+
+### Verify in the Editor
+
+`python3 tools/verify_formulas.py` → **PASS** (run from repo root).
+
+Play **Boot** (or World with a save). Check **1024×576**, **1280×720**, and **1600×900**:
+
+1. World, party **closed**: F5 / F9 / F8 buttons still click. Keys still work.
+2. Press **P**. Save/new-game **buttons disappear**. Click first roster **เข้า**, ▲ ▼, **ออก**, alloc +HP — must not jump to CharacterCreate. Press **F5** (key) — toast under the P button, no wipe. Esc / ปิดปาร์ตี้ — buttons return.
+3. Party header shows the full AGI clause. Strip names with a 16-char create name stay in the left column (`…`).
+4. HUD: two hint lines, then gold quest, then LastEnd — no overlap. After a forest fight, LastEnd still appears.
+5. ยายเมือง **E**: dialog stays on screen if you shrink the Game view; **รับเควสต์** / **ปิด** still clickable.
+6. **F8** (closed party) or Boot wipe → CharacterCreate. Shrink height (~480): **เริ่มเดินทาง** stays below the hint; empty name still errors; confirm still starts World.
+7. Boot → create → wanderer → Battle commands / auto → return. F9 load. Sandbox **Battle.unity** then World must **not** fake LastEnd.
