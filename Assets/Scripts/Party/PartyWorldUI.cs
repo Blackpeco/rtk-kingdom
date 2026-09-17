@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace TsOnline
 {
-    /// <summary>World party strip + lineup / level-up panel (P or ปาร์ตี้).</summary>
+    /// <summary>World party strip + lineup / level-up panel (P or ปาร์ตี้). Does not open while ยายเมือง dialog is up.</summary>
     public class PartyWorldUI : MonoBehaviour
     {
         bool _open;
@@ -12,7 +12,7 @@ namespace TsOnline
 
         void Start()
         {
-            if (PartyManager.Ensure().PendingPoints() > 0)
+            if (PartyManager.Ensure().PendingPoints() > 0 && PlayerWorldController.CanOpenParty)
                 _open = true;
             PlayerWorldController.PartyMenuOpen = _open;
         }
@@ -20,9 +20,18 @@ namespace TsOnline
         void Update()
         {
             if (Input.GetKeyDown(KeyCode.P))
-                _open = !_open;
+                TryToggle();
             else if (_open && Input.GetKeyDown(KeyCode.Escape))
                 _open = false;
+            PlayerWorldController.PartyMenuOpen = _open;
+        }
+
+        void TryToggle()
+        {
+            if (_open)
+                _open = false;
+            else if (PlayerWorldController.CanOpenParty)
+                _open = true;
             PlayerWorldController.PartyMenuOpen = _open;
         }
 
@@ -85,10 +94,7 @@ namespace TsOnline
             if (pm.PendingPoints() > 0)
                 label += "  [" + pm.PendingPoints() + " pts]";
             if (GUI.Button(new Rect(Screen.width - 268, 12, 248, 40), label, UiTheme.Button()))
-            {
-                _open = !_open;
-                PlayerWorldController.PartyMenuOpen = _open;
-            }
+                TryToggle();
         }
 
         void DrawPanel(PartyManager pm)

@@ -91,6 +91,10 @@ After the readability pass, two layout issues were fixed. Gameplay / save / Last
 | CharacterCreate | **เริ่มเดินทาง** sat on the hint on short heights. | Confirm + hint + error are bottom-anchored; element/stat block shrinks. |
 | Alloc +stat row | Six 110px buttons clipped under ~740px panel width; roster could cover alloc on short heights. | Wrap to 2×3 when narrow; party/roster lists scroll above alloc. |
 
+## 7. Party (P) vs ยายเมือง (E)
+
+The party modal and the city quest dialog must not be open together (OnGUI stacking stole เข้า / รับเควสต์ clicks). **Block opening the other** while one is active; close one, then the other works. `MenuOpen` / WASD lock is unchanged. F5/F9/F8 still hide only while the party panel is open.
+
 ### Verify in the Editor
 
 `python3 tools/verify_formulas.py` → **PASS** (run from repo root).
@@ -104,3 +108,4 @@ Play **Boot** (or World with a save). Check **1024×576**, **1280×720**, and **
 5. ยายเมือง **E**: dialog stays on screen if you shrink the Game view; **รับเควสต์** / **ปิด** still clickable.
 6. **F8** (closed party) or Boot wipe → CharacterCreate. Shrink height (~480): **เริ่มเดินทาง** stays below the hint; empty name still errors; confirm still starts World.
 7. Boot → create → wanderer → Battle commands / auto → return. F9 load. Sandbox **Battle.unity** then World must **not** fake LastEnd.
+8. **P** and ยายเมือง **E** are exclusive: party open → E does nothing and the quest dialog is not drawn; dialog open → P / ปาร์ตี้ does not open the panel. Close one (Esc / ปิด / ปิดปาร์ตี้), then the other works. WASD still locked while either is open. F5/F9/F8 hide-while-party unchanged.

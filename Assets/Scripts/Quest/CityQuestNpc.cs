@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace TsOnline
 {
-    /// <summary>ยายเมือง — talk (E) to accept / turn in the one forest quest.</summary>
+    /// <summary>ยายเมือง — talk (E) to accept / turn in the one forest quest. Not shown while the party panel is open.</summary>
     public class CityQuestNpc : MonoBehaviour
     {
         bool _near;
@@ -42,6 +42,13 @@ namespace TsOnline
 
         void Update()
         {
+            if (!PlayerWorldController.CanOpenDialogue)
+            {
+                _talking = false;
+                PlayerWorldController.DialogueOpen = false;
+                return;
+            }
+
             if (_near && !_talking && Input.GetKeyDown(KeyCode.E))
             {
                 _talking = true;
@@ -64,6 +71,9 @@ namespace TsOnline
 
         void OnGUI()
         {
+            if (!PlayerWorldController.CanOpenDialogue)
+                return;
+
             if (_near && !_talking)
             {
                 Vector3 screen = Camera.main != null
