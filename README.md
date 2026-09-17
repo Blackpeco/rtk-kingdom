@@ -1,12 +1,13 @@
-# TS Online — Steps 1–3 (offline)
+# TS Online — Steps 1–4 (offline)
 
 Single-player Unity scaffold for a TS Online–inspired turn-based game.
 
 - **Step 1:** Element + damage formulas — **[STEP1.md](STEP1.md)**
 - **Step 2:** 3v3 Battle test — **[STEP2.md](STEP2.md)**
 - **Step 3:** World walk + forest encounter → Battle → return — **[STEP3.md](STEP3.md)**
+- **Step 4:** Party (max 5 of 6 generals), EXP / manual level-up, Auto Attack + Auto Heal — **[STEP4.md](STEP4.md)**
 
-Out of scope: networking, gacha, CharacterCreate flow, AutoBattle, saves.
+Out of scope until Step 5: Patoyo, quests, SaveService, CharacterCreate flow, networking, gacha.
 
 ## Open in Unity
 
@@ -20,7 +21,7 @@ Missing icons: **Tools → TS Online → Create Default Data Assets**.
 ## Verify
 
 **Formulas:** `python3 tools/verify_formulas.py`  
-**Battle only:** Play `Battle.unity`  
-**World loop:** Play `World.unity` → walk right → touch a monster → finish Battle → return
+**Battle only:** Play `Battle.unity` (default party + auto toggles)  
+**World loop:** Play `World.unity` → **P** to edit party → walk right → fight → allocate points → confirm HP/Lv on the World strip
 
 Normal attacks use `DamageRequest.NormalAttack`. `BasicStrike` is a None-element skill.

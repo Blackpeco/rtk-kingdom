@@ -27,3 +27,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 400715b198ddef5e71cad7ff31f80724, type: 2}
   isGeneral: 0
   isMonster: 1
+  expReward: 20

@@ -13,8 +13,8 @@ namespace TsOnline
             title.normal.textColor = Color.white;
 
             GUI.Box(new Rect(16, 12, 620, 78), "", box);
-            GUI.Label(new Rect(28, 18, 596, 28), "World — Step 3", title);
-            GUI.Label(new Rect(28, 46, 596, 36), _hint);
+            GUI.Label(new Rect(28, 18, 596, 28), "World — Step 4", title);
+            GUI.Label(new Rect(28, 46, 596, 36), _hint + "   P = ปาร์ตี้");
 
             if (EncounterContext.LastEnd == BattleEndKind.None)
                 return;

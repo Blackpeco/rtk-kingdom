@@ -22,6 +22,7 @@ namespace TsOnline
 
         void Start()
         {
+            PartyManager.Ensure();
             ApplyCamera();
             BuildGround();
             BuildLabels();
@@ -29,6 +30,7 @@ namespace TsOnline
             LoadEnemyRefs();
             BuildForestEncounters();
             gameObject.AddComponent<WorldHUD>();
+            gameObject.AddComponent<PartyWorldUI>();
 
             if (EncounterContext.ShouldReturnToWorld || EncounterContext.LastEnd != BattleEndKind.None)
             {
@@ -92,7 +94,8 @@ namespace TsOnline
             label.transform.SetParent(go.transform, false);
             label.transform.localPosition = new Vector3(0f, 0.7f, 0f);
             var tm = label.AddComponent<TextMesh>();
-            tm.text = "จูล่ง";
+            PartyMember lead = PartyManager.Ensure().Party.Count > 0 ? PartyManager.Ensure().Party[0] : null;
+            tm.text = lead != null && !string.IsNullOrEmpty(lead.ThaiName) ? lead.ThaiName : "จูล่ง";
             tm.characterSize = 0.16f;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.fontSize = 24;

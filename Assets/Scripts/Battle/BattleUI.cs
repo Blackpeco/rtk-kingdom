@@ -12,8 +12,12 @@ namespace TsOnline
     public class BattleUI : MonoBehaviour
     {
         TurnManager _turns;
+        AutoBattleController _auto;
         readonly List<string> _log = new List<string>();
         readonly List<Popup> _popups = new List<Popup>();
+        bool _showLevelUp;
+        int _levelPick;
+        System.Action _afterLevelUp;
 
         Font _font;
         Canvas _canvas;
@@ -32,9 +36,10 @@ namespace TsOnline
             public float age;
         }
 
-        public void Bind(TurnManager turns)
+        public void Bind(TurnManager turns, AutoBattleController auto = null)
         {
             _turns = turns;
+            _auto = auto;
             _turns.OnChanged += Rebuild;
             _turns.OnLog += AppendLog;
             _turns.OnPopup += (unit, text, color) =>
@@ -66,8 +71,36 @@ namespace TsOnline
             }
         }
 
+        public void NoteRewards(string summary)
+        {
+            if (!string.IsNullOrEmpty(summary))
+                AppendLog(summary);
+            if (_banner != null && !string.IsNullOrEmpty(summary))
+                _banner.text = (_turns != null ? _turns.Banner : "") + "  ·  " + summary;
+        }
+
+        public void OpenLevelUp(System.Action afterDone)
+        {
+            _showLevelUp = true;
+            _afterLevelUp = afterDone;
+            PartyManager pm = PartyManager.Ensure();
+            _levelPick = 0;
+            for (int i = 0; i < pm.Party.Count; i++)
+            {
+                if (pm.Party[i] != null && pm.Party[i].unspentPoints > 0)
+                {
+                    _levelPick = i;
+                    break;
+                }
+            }
+        }
+
         void OnGUI()
         {
+            DrawAutoToggles();
+            if (_showLevelUp)
+                DrawLevelUp();
+
             if (Camera.main == null)
                 return;
             var style = new GUIStyle(GUI.skin.label)
@@ -86,6 +119,98 @@ namespace TsOnline
                 float y = Screen.height - screen.y;
                 GUI.Label(new Rect(screen.x - 90f, y - 18f, 180f, 36f), p.text, style);
             }
+        }
+
+        void DrawAutoToggles()
+        {
+            if (_auto == null)
+                return;
+            float x = Screen.width - 276f;
+            GUI.Box(new Rect(x, 8, 264, 92), "");
+            GUI.Label(new Rect(x + 10, 12, 244, 20), "Auto Battle");
+            _auto.AutoAttack = GUI.Toggle(new Rect(x + 10, 34, 120, 22), _auto.AutoAttack, "Auto Attack");
+            _auto.AutoHeal = GUI.Toggle(new Rect(x + 130, 34, 120, 22), _auto.AutoHeal, "Auto Heal");
+            GUI.Label(new Rect(x + 10, 58, 150, 22), "Heal ถ้า HP < " + Mathf.RoundToInt(_auto.HealThresholdPercent) + "%");
+            if (GUI.Button(new Rect(x + 168, 56, 36, 24), "−"))
+                _auto.HealThresholdPercent = Mathf.Max(10f, _auto.HealThresholdPercent - 10f);
+            if (GUI.Button(new Rect(x + 210, 56, 36, 24), "+"))
+                _auto.HealThresholdPercent = Mathf.Min(100f, _auto.HealThresholdPercent + 10f);
+        }
+
+        void DrawLevelUp()
+        {
+            PartyManager pm = PartyManager.Ensure();
+            float w = Mathf.Min(640f, Screen.width - 40f);
+            float h = 300f;
+            var box = new Rect((Screen.width - w) * 0.5f, Screen.height * 0.5f - h * 0.5f, w, h);
+            GUI.Box(box, "");
+            GUI.Label(new Rect(box.x + 16, box.y + 10, w - 32, 24),
+                string.IsNullOrEmpty(pm.LastRewardSummary) ? "เลเวลอัพ — แจกแต้มสถานะ" : pm.LastRewardSummary);
+
+            if (pm.Party.Count == 0)
+            {
+                if (GUI.Button(new Rect(box.x + w * 0.5f - 70, box.y + h - 48, 140, 36), ContinueLabel()))
+                    FinishLevelUp();
+                return;
+            }
+
+            _levelPick = Mathf.Clamp(_levelPick, 0, pm.Party.Count - 1);
+            float tabX = box.x + 16;
+            for (int i = 0; i < pm.Party.Count; i++)
+            {
+                PartyMember tab = pm.Party[i];
+                string t = tab.ShortName + (tab.unspentPoints > 0 ? " +" + tab.unspentPoints : "");
+                if (GUI.Button(new Rect(tabX, box.y + 40, 110, 28), t))
+                    _levelPick = i;
+                tabX += 114;
+            }
+
+            PartyMember m = pm.Party[_levelPick];
+            UnitStats s = m.EffectiveStats;
+            GUI.Label(new Rect(box.x + 16, box.y + 78, w - 32, 22),
+                m.ShortName + " / " + m.ThaiName + "  Lv " + m.level
+                + "  EXP " + m.exp + "/" + ExpLevelSystem.ExpToNext(m.level)
+                + "  แต้ม " + m.unspentPoints);
+            GUI.Label(new Rect(box.x + 16, box.y + 102, w - 32, 22),
+                "HP " + m.currentHp + "/" + s.hp + "   SP " + m.currentSp + "/" + s.sp
+                + "   ATK " + s.atk + "  INT " + s.intel + "  DEF " + s.def + "  AGI " + s.agi);
+
+            if (m.unspentPoints > 0)
+            {
+                DrawAllocBtn(m, box.x + 16, box.y + 136, "HP +" + ExpLevelSystem.HpPerPoint, ExpLevelSystem.StatKind.Hp);
+                DrawAllocBtn(m, box.x + 116, box.y + 136, "SP +" + ExpLevelSystem.SpPerPoint, ExpLevelSystem.StatKind.Sp);
+                DrawAllocBtn(m, box.x + 216, box.y + 136, "ATK +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Atk);
+                DrawAllocBtn(m, box.x + 316, box.y + 136, "INT +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Intel);
+                DrawAllocBtn(m, box.x + 416, box.y + 136, "DEF +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Def);
+                DrawAllocBtn(m, box.x + 516, box.y + 136, "AGI +" + ExpLevelSystem.CombatPerPoint, ExpLevelSystem.StatKind.Agi);
+            }
+            else
+            {
+                GUI.Label(new Rect(box.x + 16, box.y + 140, w - 32, 28), "ขุนพลนี้ไม่มีแต้มเหลือ — เลือกแท็บอื่นหรือดำเนินการต่อ");
+            }
+
+            if (GUI.Button(new Rect(box.x + w * 0.5f - 80, box.y + h - 48, 160, 36), ContinueLabel()))
+                FinishLevelUp();
+        }
+
+        static void DrawAllocBtn(PartyMember m, float x, float y, string label, ExpLevelSystem.StatKind stat)
+        {
+            if (GUI.Button(new Rect(x, y, 96, 32), label))
+                ExpLevelSystem.SpendPoint(m, stat);
+        }
+
+        string ContinueLabel()
+        {
+            return _afterLevelUp != null ? "กลับโลก" : "ดำเนินการต่อ";
+        }
+
+        void FinishLevelUp()
+        {
+            _showLevelUp = false;
+            System.Action done = _afterLevelUp;
+            _afterLevelUp = null;
+            if (done != null)
+                done();
         }
 
         void BuildCanvas()
@@ -198,25 +323,41 @@ namespace TsOnline
         void RefreshHud(RectTransform root, List<BattleUnit> units)
         {
             ClearKids(root);
-            float y = 140f;
+            int n = units.Count;
+            float cardH = n >= 5 ? 70f : 100f;
+            float gap = n >= 5 ? 6f : 10f;
+            float total = n * cardH + Mathf.Max(0, n - 1) * gap;
+            var rootRt = root.GetComponent<RectTransform>();
+            rootRt.sizeDelta = new Vector2(280, Mathf.Max(360f, total + 16f));
+            float y = total * 0.5f - cardH * 0.5f;
             for (int i = 0; i < units.Count; i++)
             {
                 BattleUnit unit = units[i];
-                var card = MakePanel(root, "Card" + i, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, y), new Vector2(260, 100));
+                var card = MakePanel(root, "Card" + i, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, y), new Vector2(260, cardH));
                 var img = card.GetComponent<Image>();
                 img.color = unit != null && unit == _turns.CurrentActor
                     ? new Color(0.18f, 0.22f, 0.16f, 0.92f)
                     : new Color(0.08f, 0.09f, 0.11f, 0.82f);
 
-                string title = unit == null ? "-" : unit.ShortName + "  " + ThaiElement(unit.Element);
+                string lv = "";
+                if (unit != null && unit.isPlayer)
+                {
+                    PartyMember member = PartyManager.Ensure().FindByDefinition(unit.definition);
+                    if (member != null)
+                        lv = "  Lv" + member.level;
+                }
+
+                string title = unit == null ? "-" : unit.ShortName + "  " + ThaiElement(unit.Element) + lv;
                 var name = MakeText(card, "N", 14, TextAnchor.MiddleLeft, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -16), new Vector2(240, 22));
                 name.text = title;
                 name.color = unit != null && unit.IsAlive ? Color.white : new Color(1f, 0.4f, 0.4f);
 
                 if (unit != null)
                 {
-                    MakeBar(card, "HP", new Vector2(0, -40), unit.currentHp, unit.stats.hp, new Color(0.75f, 0.22f, 0.22f), "HP " + unit.currentHp + "/" + unit.stats.hp);
-                    MakeBar(card, "SP", new Vector2(0, -68), unit.currentSp, Mathf.Max(1, unit.stats.sp), new Color(0.22f, 0.45f, 0.82f), "SP " + unit.currentSp + "/" + unit.stats.sp);
+                    float hpY = n >= 5 ? -34f : -40f;
+                    float spY = n >= 5 ? -54f : -68f;
+                    MakeBar(card, "HP", new Vector2(0, hpY), unit.currentHp, unit.stats.hp, new Color(0.75f, 0.22f, 0.22f), "HP " + unit.currentHp + "/" + unit.stats.hp);
+                    MakeBar(card, "SP", new Vector2(0, spY), unit.currentSp, Mathf.Max(1, unit.stats.sp), new Color(0.22f, 0.45f, 0.82f), "SP " + unit.currentSp + "/" + unit.stats.sp);
                     if (unit.isDefending)
                     {
                         var d = MakeText(card, "D", 11, TextAnchor.MiddleRight, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-12, -16), new Vector2(80, 18));
@@ -225,7 +366,7 @@ namespace TsOnline
                     }
                 }
 
-                y -= 110f;
+                y -= cardH + gap;
             }
         }
 

@@ -1,6 +1,6 @@
 # Step 2 — 3v3 Battle test (offline)
 
-Thai + English. Full World map is **Step 3** (`STEP3.md`). Networking, AutoBattle, and saves remain out of scope.
+Thai + English. World map is **Step 3** (`STEP3.md`). Party / EXP / AutoBattle are **Step 4** (`STEP4.md`). Networking and saves remain out of scope.
 
 ## What you can play
 

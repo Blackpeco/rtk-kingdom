@@ -65,13 +65,21 @@ namespace TsOnline
             }
         }
 
-        public void Init(UnitDefinition def, bool playerSide)
+        public void Init(UnitDefinition def, bool playerSide, PartyMember member = null)
         {
             definition = def;
             isPlayer = playerSide;
-            stats = def != null ? def.baseStats : new UnitStats(1, 0, 1, 1, 0, 1);
-            currentHp = Mathf.Max(1, stats.hp);
-            currentSp = Mathf.Max(0, stats.sp);
+            if (member != null)
+            {
+                member.ApplyToBattle(this);
+            }
+            else
+            {
+                stats = def != null ? def.baseStats : new UnitStats(1, 0, 1, 1, 0, 1);
+                currentHp = Mathf.Max(1, stats.hp);
+                currentSp = Mathf.Max(0, stats.sp);
+            }
+
             isDefending = false;
             status = ElementStatusKind.None;
             statusTurnsLeft = 0;

@@ -11,6 +11,7 @@ namespace TsOnline
 
         void Start()
         {
+            PartyManager.Ensure();
             Invoke(nameof(Go), delay);
         }
 

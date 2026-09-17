@@ -244,6 +244,11 @@ SCRIPTS = [
     "Assets/Scripts/Data/ItemDefinition.cs",
     "Assets/Scripts/Data/EncounterTable.cs",
     "Assets/Scripts/Battle/DamageFormulaSmokeTest.cs",
+    "Assets/Scripts/Battle/AutoBattleController.cs",
+    "Assets/Scripts/Party/PartyMember.cs",
+    "Assets/Scripts/Party/ExpLevelSystem.cs",
+    "Assets/Scripts/Party/PartyManager.cs",
+    "Assets/Scripts/Party/PartyWorldUI.cs",
     "Assets/Editor/ElementFormulaTestWindow.cs",
     "Assets/Editor/CreateDefaultDataMenu.cs",
 ]
@@ -254,6 +259,7 @@ FOLDERS = [
     "Assets/Scripts/Core",
     "Assets/Scripts/Map",
     "Assets/Scripts/Battle",
+    "Assets/Scripts/Party",
     "Assets/Scripts/Data",
     "Assets/Scripts/UI",
     "Assets/Scripts/AI",
@@ -322,6 +328,7 @@ def unit_asset(
     monster: bool,
     skill_guids: list[str],
     script: str,
+    exp_reward: int = 0,
 ) -> str:
     hp, sp, atk, intel, defense, agi = stats
     if skill_guids:
@@ -343,6 +350,7 @@ def unit_asset(
 {skills}
   isGeneral: {1 if general else 0}
   isMonster: {1 if monster else 0}
+  expReward: {exp_reward}
 """
 
 
@@ -737,20 +745,20 @@ def main() -> None:
         )
 
     monsters = [
-        ("ForestWolf", "forest_wolf", "Forest Wolf", "หมาป่า", 4, (55, 15, 42, 12, 18, 70), ["WindClaw"]),
-        ("MountainBandit", "mountain_bandit", "Mountain Bandit", "โจรภูเขา", 3, (70, 10, 48, 10, 22, 40), ["TorchSlash"]),
-        ("SwampFrog", "swamp_frog", "Swamp Frog", "กบทึง", 2, (50, 20, 28, 30, 16, 35), ["BogSpit"]),
-        ("SmallStoneGolem", "small_stone_golem", "Small Stone Golem", "โกเล็มหินเล็ก", 1, (90, 10, 35, 8, 40, 15), ["StoneFist"]),
-        ("RoofBird", "roof_bird", "Roof Bird", "นกหลังคา", 4, (40, 12, 30, 14, 12, 85), ["DivePeck"]),
-        ("LostSoldier", "lost_soldier", "Lost Soldier", "ทหารหลงทาง", 3, (65, 12, 40, 16, 24, 38), ["TorchSlash", "BasicStrike"]),
+        ("ForestWolf", "forest_wolf", "Forest Wolf", "หมาป่า", 4, (55, 15, 42, 12, 18, 70), ["WindClaw"], 22),
+        ("MountainBandit", "mountain_bandit", "Mountain Bandit", "โจรภูเขา", 3, (70, 10, 48, 10, 22, 40), ["TorchSlash"], 24),
+        ("SwampFrog", "swamp_frog", "Swamp Frog", "กบทึง", 2, (50, 20, 28, 30, 16, 35), ["BogSpit"], 20),
+        ("SmallStoneGolem", "small_stone_golem", "Small Stone Golem", "โกเล็มหินเล็ก", 1, (90, 10, 35, 8, 40, 15), ["StoneFist"], 28),
+        ("RoofBird", "roof_bird", "Roof Bird", "นกหลังคา", 4, (40, 12, 30, 14, 12, 85), ["DivePeck"], 16),
+        ("LostSoldier", "lost_soldier", "Lost Soldier", "ทหารหลงทาง", 3, (65, 12, 40, 16, 24, 38), ["TorchSlash", "BasicStrike"], 22),
     ]
     monster_guids = []
-    for file, uid, en, th, element, stats, sk in monsters:
+    for file, uid, en, th, element, stats, sk, exp in monsters:
         rel = f"Assets/Data/Monsters/{file}.asset"
         monster_guids.append(guid_for(rel))
         write_asset(
             rel,
-            unit_asset(file, uid, en, th, element, stats, False, True, [skill_guids[s] for s in sk], unit_script),
+            unit_asset(file, uid, en, th, element, stats, False, True, [skill_guids[s] for s in sk], unit_script, exp),
         )
 
     write_asset(

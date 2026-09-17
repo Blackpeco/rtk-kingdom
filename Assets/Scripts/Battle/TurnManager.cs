@@ -68,7 +68,7 @@ namespace TsOnline
 
         public void BeginBattle()
         {
-            Log("===== เริ่มทดสอบ 3v3 =====");
+            Log("===== เริ่มการต่อสู้ =====");
             StartNextRound();
         }
 

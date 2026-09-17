@@ -6,6 +6,8 @@ namespace TsOnline
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerWorldController : MonoBehaviour
     {
+        public static bool MenuOpen;
+
         public float moveSpeed = 4.2f;
         Rigidbody2D _body;
 
@@ -19,6 +21,16 @@ namespace TsOnline
 
         void FixedUpdate()
         {
+            if (MenuOpen)
+            {
+#if UNITY_6000_0_OR_NEWER
+                _body.linearVelocity = Vector2.zero;
+#else
+                _body.velocity = Vector2.zero;
+#endif
+                return;
+            }
+
             float x = Input.GetAxisRaw("Horizontal");
             float y = Input.GetAxisRaw("Vertical");
             if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) x = -1f;

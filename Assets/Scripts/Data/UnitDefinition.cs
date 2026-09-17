@@ -13,5 +13,7 @@ namespace TsOnline
         public SkillDefinition[] startingSkills;
         public bool isGeneral;
         public bool isMonster;
+        [Tooltip("EXP granted to the party when this unit is defeated.")]
+        public int expReward;
     }
 }

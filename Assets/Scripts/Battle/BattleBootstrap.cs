@@ -10,7 +10,7 @@ using UnityEditor;
 namespace TsOnline
 {
     /// <summary>
-    /// Spawns a 3v3 test battle in Battle.unity. Wire units in the inspector, or leave empty to load defaults.
+    /// Spawns the current PartyManager roster vs encounter enemies. Direct Play on Battle.unity uses the default 3 generals.
     /// </summary>
     public class BattleBootstrap : MonoBehaviour
     {
@@ -49,14 +49,17 @@ namespace TsOnline
             }
 
             ApplyCamera();
+            PartyManager.Ensure();
             _turns = gameObject.AddComponent<TurnManager>();
             _ui = gameObject.AddComponent<BattleUI>();
+            var auto = gameObject.AddComponent<AutoBattleController>();
 
-            var players = SpawnSide(playerParty, true);
-            var enemies = SpawnSide(enemyParty, false);
+            var players = SpawnPlayers();
+            var enemies = SpawnSide(enemyParty, false, null);
             _turns.Setup(players, enemies);
             _turns.OnChanged += HandleBattleChanged;
-            _ui.Bind(_turns);
+            _ui.Bind(_turns, auto);
+            auto.Bind(_turns);
             _turns.BeginBattle();
         }
 
@@ -72,9 +75,21 @@ namespace TsOnline
             else
                 EncounterContext.LastEnd = BattleEndKind.Lose;
 
-            if (!EncounterContext.ShouldReturnToWorld)
-                return;
-            StartCoroutine(ReturnToWorld());
+            PartyManager pm = PartyManager.Ensure();
+            pm.WriteBackFromBattle(_turns.PlayerUnits);
+            if (_turns.PlayerWon)
+                pm.AwardWinExp(enemyParty);
+            if (_ui != null)
+                _ui.NoteRewards(pm.LastRewardSummary);
+
+            System.Action goHome = EncounterContext.ShouldReturnToWorld
+                ? () => StartCoroutine(ReturnToWorld())
+                : (System.Action)null;
+
+            if (pm.PendingPoints() > 0 && _ui != null)
+                _ui.OpenLevelUp(goHome);
+            else if (goHome != null)
+                StartCoroutine(ReturnToWorld());
         }
 
         IEnumerator ReturnToWorld()
@@ -86,10 +101,12 @@ namespace TsOnline
 
         void ResolveRoster()
         {
+            PartyManager pm = PartyManager.Ensure();
+            if (pm.Party.Count > 0)
+                playerParty = pm.ActiveDefinitions();
+
             if (EncounterContext.HasPending)
             {
-                if (EncounterContext.PlayerParty != null)
-                    playerParty = EncounterContext.PlayerParty;
                 if (EncounterContext.Enemies != null)
                     enemyParty = EncounterContext.Enemies;
             }
@@ -169,30 +186,70 @@ namespace TsOnline
             return trimmed;
         }
 
-        List<BattleUnit> SpawnSide(UnitDefinition[] defs, bool player)
+        List<BattleUnit> SpawnPlayers()
+        {
+            PartyManager pm = PartyManager.Ensure();
+            if (pm.Party.Count > 0)
+                return SpawnSide(null, true, pm.Party);
+            return SpawnSide(playerParty, true, null);
+        }
+
+        List<BattleUnit> SpawnSide(UnitDefinition[] defs, bool player, IList<PartyMember> members)
         {
             var list = new List<BattleUnit>();
             int count = 0;
-            for (int i = 0; i < defs.Length; i++)
+            if (members != null)
             {
-                if (defs[i] != null)
-                    count++;
+                for (int i = 0; i < members.Count; i++)
+                {
+                    if (members[i] != null && members[i].definition != null)
+                        count++;
+                }
+            }
+            else if (defs != null)
+            {
+                for (int i = 0; i < defs.Length; i++)
+                {
+                    if (defs[i] != null)
+                        count++;
+                }
             }
 
             int slot = 0;
+            if (members != null)
+            {
+                for (int i = 0; i < members.Count; i++)
+                {
+                    PartyMember member = members[i];
+                    if (member == null || member.definition == null)
+                        continue;
+                    list.Add(MakeUnit(member.definition, player, member, slot, count));
+                    slot++;
+                }
+
+                return list;
+            }
+
+            if (defs == null)
+                return list;
             for (int i = 0; i < defs.Length; i++)
             {
                 if (defs[i] == null)
                     continue;
-                var go = new GameObject();
-                var unit = go.AddComponent<BattleUnit>();
-                unit.Init(defs[i], player);
-                BattleWorldView.AttachPlaceholder(unit, slot, count);
-                list.Add(unit);
+                list.Add(MakeUnit(defs[i], player, null, slot, count));
                 slot++;
             }
 
             return list;
+        }
+
+        static BattleUnit MakeUnit(UnitDefinition def, bool player, PartyMember member, int slot, int count)
+        {
+            var go = new GameObject();
+            var unit = go.AddComponent<BattleUnit>();
+            unit.Init(def, player, member);
+            BattleWorldView.AttachPlaceholder(unit, slot, count);
+            return unit;
         }
 
         static void ApplyCamera()

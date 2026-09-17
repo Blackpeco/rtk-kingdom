@@ -84,17 +84,17 @@ namespace TsOnline.EditorTools
                 new UnitStats(95, 80, 32, 92, 50, 52), rockslide, earthenWall);
 
             UnitDefinition wolf = WriteMonster("ForestWolf", "forest_wolf", "Forest Wolf", "หมาป่า", ElementType.Wind,
-                new UnitStats(55, 15, 42, 12, 18, 70), windClaw);
+                new UnitStats(55, 15, 42, 12, 18, 70), 22, windClaw);
             UnitDefinition bandit = WriteMonster("MountainBandit", "mountain_bandit", "Mountain Bandit", "โจรภูเขา", ElementType.Fire,
-                new UnitStats(70, 10, 48, 10, 22, 40), torchSlash);
+                new UnitStats(70, 10, 48, 10, 22, 40), 24, torchSlash);
             UnitDefinition frog = WriteMonster("SwampFrog", "swamp_frog", "Swamp Frog", "กบทึง", ElementType.Water,
-                new UnitStats(50, 20, 28, 30, 16, 35), bogSpit);
+                new UnitStats(50, 20, 28, 30, 16, 35), 20, bogSpit);
             UnitDefinition golem = WriteMonster("SmallStoneGolem", "small_stone_golem", "Small Stone Golem", "โกเล็มหินเล็ก", ElementType.Earth,
-                new UnitStats(90, 10, 35, 8, 40, 15), stoneFist);
+                new UnitStats(90, 10, 35, 8, 40, 15), 28, stoneFist);
             UnitDefinition bird = WriteMonster("RoofBird", "roof_bird", "Roof Bird", "นกหลังคา", ElementType.Wind,
-                new UnitStats(40, 12, 30, 14, 12, 85), divePeck);
+                new UnitStats(40, 12, 30, 14, 12, 85), 16, divePeck);
             UnitDefinition soldier = WriteMonster("LostSoldier", "lost_soldier", "Lost Soldier", "ทหารหลงทาง", ElementType.Fire,
-                new UnitStats(65, 12, 40, 16, 24, 38), torchSlash, basicStrike);
+                new UnitStats(65, 12, 40, 16, 24, 38), 22, torchSlash, basicStrike);
 
             WriteItem("Herb", "herb", "Herb", "สมุนไพร", "Step 1 stub. Restores a little HP later.");
 
@@ -162,18 +162,18 @@ namespace TsOnline.EditorTools
         static UnitDefinition WriteGeneral(
             string file, string id, string en, string th, ElementType element, UnitStats stats, params SkillDefinition[] skills)
         {
-            return WriteUnit("Assets/Data/Generals/" + file + ".asset", id, en, th, element, stats, true, false, skills);
+            return WriteUnit("Assets/Data/Generals/" + file + ".asset", id, en, th, element, stats, true, false, 0, skills);
         }
 
         static UnitDefinition WriteMonster(
-            string file, string id, string en, string th, ElementType element, UnitStats stats, params SkillDefinition[] skills)
+            string file, string id, string en, string th, ElementType element, UnitStats stats, int expReward, params SkillDefinition[] skills)
         {
-            return WriteUnit("Assets/Data/Monsters/" + file + ".asset", id, en, th, element, stats, false, true, skills);
+            return WriteUnit("Assets/Data/Monsters/" + file + ".asset", id, en, th, element, stats, false, true, expReward, skills);
         }
 
         static UnitDefinition WriteUnit(
             string path, string id, string en, string th, ElementType element, UnitStats stats,
-            bool general, bool monster, params SkillDefinition[] skills)
+            bool general, bool monster, int expReward, params SkillDefinition[] skills)
         {
             UnitDefinition asset = LoadOrCreate<UnitDefinition>(path);
             asset.id = id;
@@ -184,6 +184,7 @@ namespace TsOnline.EditorTools
             asset.startingSkills = skills;
             asset.isGeneral = general;
             asset.isMonster = monster;
+            asset.expReward = expReward;
             EditorUtility.SetDirty(asset);
             return asset;
         }
