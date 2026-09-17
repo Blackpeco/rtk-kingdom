@@ -14,22 +14,13 @@ namespace TsOnline
             var go = new GameObject("Npc_Grandma");
             go.transform.position = new Vector3(-7.5f, 1.7f, 0f);
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = WorldArt.MakeQuad(new Color(0.55f, 0.42f, 0.78f), 14);
+            sr.sprite = WorldArt.MakeShape(new Color(0.62f, 0.42f, 0.88f), 22, WorldArt.Shape.Triangle);
             sr.sortingOrder = 5;
             var col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
             col.radius = 0.7f;
             go.AddComponent<CityQuestNpc>();
-
-            var label = new GameObject("Name");
-            label.transform.SetParent(go.transform, false);
-            label.transform.localPosition = new Vector3(0f, 0.7f, 0f);
-            var tm = label.AddComponent<TextMesh>();
-            tm.text = "ยายเมือง";
-            tm.characterSize = 0.14f;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.fontSize = 22;
-            tm.color = Color.white;
+            WorldArt.MakeLabel(go.transform, "ยายเมือง", new Vector3(0f, 0.72f, 0f), Color.white, 0.13f, 24);
             return go;
         }
 
@@ -79,22 +70,22 @@ namespace TsOnline
                     ? Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 0.9f)
                     : Vector3.zero;
                 if (Camera.main != null && screen.z > 0f)
-                    GUI.Label(new Rect(screen.x - 70, Screen.height - screen.y - 8, 140, 22), "กด E เพื่อคุย");
+                    GUI.Label(new Rect(screen.x - 80, Screen.height - screen.y - 10, 160, 26), "กด E เพื่อคุย", UiTheme.Body());
             }
 
             if (!_talking)
                 return;
 
-            float w = 520f;
-            float h = 168f;
+            float w = 560f;
+            float h = 188f;
             var box = new Rect((Screen.width - w) * 0.5f, Screen.height - h - 24, w, h);
-            GUI.Box(box, "");
-            GUI.Label(new Rect(box.x + 16, box.y + 10, w - 32, 24), "ยายเมือง");
-            GUI.Label(new Rect(box.x + 16, box.y + 38, w - 32, 60), _line);
+            UiTheme.DrawPanel(box);
+            GUI.Label(new Rect(box.x + 16, box.y + 10, w - 32, 28), "ยายเมือง", UiTheme.Title());
+            GUI.Label(new Rect(box.x + 16, box.y + 44, w - 32, 72), _line, UiTheme.Body());
 
             if (QuestTracker.Phase == QuestPhase.None)
             {
-                if (GUI.Button(new Rect(box.x + 16, box.y + h - 48, 160, 36), "รับเควสต์"))
+                if (GUI.Button(new Rect(box.x + 16, box.y + h - 52, 168, 40), "รับเควสต์", UiTheme.Button()))
                 {
                     QuestTracker.Accept();
                     _line = "ป่าด้านขวาไม่สงบ… ชนะการรบในป่า 2 ครั้ง แล้วกลับมาหาฉัน";
@@ -103,7 +94,7 @@ namespace TsOnline
             }
             else if (QuestTracker.Phase == QuestPhase.Ready)
             {
-                if (GUI.Button(new Rect(box.x + 16, box.y + h - 48, 160, 36), "ส่งเควสต์"))
+                if (GUI.Button(new Rect(box.x + 16, box.y + h - 52, 168, 40), "ส่งเควสต์", UiTheme.Button()))
                 {
                     string msg;
                     if (QuestTracker.TryComplete(out msg))
@@ -114,7 +105,7 @@ namespace TsOnline
                 }
             }
 
-            if (GUI.Button(new Rect(box.x + w - 132, box.y + h - 48, 116, 36), "ปิด"))
+            if (GUI.Button(new Rect(box.x + w - 140, box.y + h - 52, 124, 40), "ปิด", UiTheme.Button()))
             {
                 _talking = false;
                 PlayerWorldController.DialogueOpen = false;

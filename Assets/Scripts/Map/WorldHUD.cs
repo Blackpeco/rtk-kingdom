@@ -21,20 +21,38 @@ namespace TsOnline
 
         void OnGUI()
         {
-            var box = new GUIStyle(GUI.skin.box) { fontSize = 15, alignment = TextAnchor.MiddleLeft, wordWrap = true };
-            var title = new GUIStyle(GUI.skin.label) { fontSize = 18, fontStyle = FontStyle.Bold };
-            title.normal.textColor = Color.white;
-
             PartyMember lead = PartyManager.Ensure().Party.Count > 0 ? PartyManager.Ensure().Party[0] : null;
-            string leadTitle = lead != null
-                ? lead.ShortName + "  " + CreatedHero.Thai(lead.Element)
-                : "World";
+            float boxW = Mathf.Min(720f, Screen.width - 280f);
+            var box = new Rect(16, 12, boxW, UiTheme.WorldHudHeight);
+            UiTheme.DrawPanel(box);
 
-            GUI.Box(new Rect(16, 12, 640, 118), "", box);
-            GUI.Label(new Rect(28, 16, 616, 26), leadTitle, title);
-            GUI.Label(new Rect(28, 42, 616, 28), _hint);
-            GUI.Label(new Rect(28, 70, 616, 24), QuestTracker.ObjectiveLine()
-                + "   ·   สมุนไพร ×" + InventoryService.CountOf(InventoryService.HerbId));
+            string leadTitle = lead != null
+                ? lead.ShortName + "   " + CreatedHero.Thai(lead.Element)
+                : "World";
+            var title = new GUIStyle(UiTheme.Title());
+            if (lead != null)
+                title.normal.textColor = Color.Lerp(CreatedHero.ColorOf(lead.Element), Color.white, 0.35f);
+            GUI.Label(new Rect(box.x + 14, box.y + 8, box.width - 28, 28), leadTitle, title);
+
+            if (lead != null)
+            {
+                UnitStats s = lead.EffectiveStats;
+                var barLabel = new GUIStyle(UiTheme.Tiny()) { alignment = TextAnchor.MiddleCenter, fontSize = 13 };
+                UiTheme.DrawBar(new Rect(box.x + 14, box.y + 40, box.width - 28, 20),
+                    lead.currentHp, s.hp, UiTheme.Hp, UiTheme.HpBack,
+                    "HP  " + lead.currentHp + " / " + s.hp, barLabel);
+                UiTheme.DrawBar(new Rect(box.x + 14, box.y + 64, box.width - 28, 16),
+                    lead.currentSp, Mathf.Max(1, s.sp), UiTheme.Sp, UiTheme.SpBack,
+                    "SP  " + lead.currentSp + " / " + s.sp, barLabel);
+            }
+
+            GUI.Label(new Rect(box.x + 14, box.y + 86, box.width - 28, 22), _hint, UiTheme.Hint());
+
+            var quest = new GUIStyle(UiTheme.Body()) { fontStyle = FontStyle.Bold };
+            quest.normal.textColor = new Color(1f, 0.92f, 0.62f);
+            GUI.Label(new Rect(box.x + 14, box.y + 110, box.width - 28, 24),
+                QuestTracker.ObjectiveLine() + "    สมุนไพร ×" + InventoryService.CountOf(InventoryService.HerbId),
+                quest);
 
             if (EncounterContext.LastEnd != BattleEndKind.None)
             {
@@ -47,23 +65,24 @@ namespace TsOnline
                     default: result = ""; break;
                 }
 
-                GUI.Label(new Rect(28, 94, 500, 22), result);
+                GUI.Label(new Rect(box.x + 14, box.y + 136, box.width - 28, 22), result, UiTheme.Body());
             }
 
-            if (GUI.Button(new Rect(Screen.width - 240, 54, 108, 32), "บันทึก (F5)"))
+            float sx = Screen.width - 268f;
+            if (GUI.Button(new Rect(sx, 58, 120, 36), "บันทึก (F5)", UiTheme.Button()))
                 SaveService.Save(null);
-            if (GUI.Button(new Rect(Screen.width - 126, 54, 110, 32), "โหลด (F9)"))
+            if (GUI.Button(new Rect(sx + 128, 58, 120, 36), "โหลด (F9)", UiTheme.Button()))
             {
                 if (SaveService.TryLoad())
                     SaveService.TryApplyWorldPosition(SaveService.FindPlayer());
             }
-            if (GUI.Button(new Rect(Screen.width - 240, 90, 224, 28), "เกมใหม่ / ลบเซฟ (F8)"))
+            if (GUI.Button(new Rect(sx, 98, 248, 34), "เกมใหม่ / ลบเซฟ (F8)", UiTheme.Button()))
                 SaveService.ResetRuntimeAndCreate();
 
             if (!string.IsNullOrEmpty(SaveService.LastMessage)
                 && Time.realtimeSinceStartup - SaveService.LastMessageAt < 2.5f)
             {
-                GUI.Label(new Rect(Screen.width - 240, 122, 224, 22), SaveService.LastMessage);
+                GUI.Label(new Rect(sx, 136, 248, 24), SaveService.LastMessage, UiTheme.Hint());
             }
         }
     }

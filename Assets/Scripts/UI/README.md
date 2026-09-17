@@ -1,1 +1,2 @@
-Reserved for later Battle / World UI. Step 1 has no runtime UI beyond Console logs.
+Shared OnGUI readability helpers in `UiTheme` (World HUD, create, party, battle popups / auto).  
+Battle commands and HP/SP cards are still runtime uGUI in `BattleUI`.

@@ -31,17 +31,10 @@ namespace TsOnline
             var go = new GameObject("PatoyoHelper");
             go.transform.position = new Vector3(-6.6f, -3.35f, 0f);
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = WorldArt.MakeQuad(new Color(1f, 0.58f, 0.72f), 10);
+            sr.sprite = WorldArt.MakeShape(new Color(1f, 0.52f, 0.70f), 20, WorldArt.Shape.Blob);
             sr.sortingOrder = 3;
-            var label = new GameObject("Name");
-            label.transform.SetParent(go.transform, false);
-            label.transform.localPosition = new Vector3(0f, 0.55f, 0f);
-            var tm = label.AddComponent<TextMesh>();
-            tm.text = "ปาโต้เยา";
-            tm.characterSize = 0.14f;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.fontSize = 22;
-            tm.color = new Color(1f, 0.85f, 0.9f);
+            WorldArt.MakeLabel(go.transform, "ปาโต้เยา", new Vector3(0f, 0.58f, 0f),
+                new Color(1f, 0.86f, 0.92f), 0.13f, 22);
         }
     }
 }

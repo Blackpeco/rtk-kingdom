@@ -17,20 +17,12 @@ namespace TsOnline
                 : new Vector3(-7f, -0.4f, 0f);
             go.transform.position = start;
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = WorldArt.MakeQuad(new Color(1f, 0.58f, 0.72f), 12);
+            sr.sprite = WorldArt.MakeShape(new Color(1f, 0.52f, 0.70f), 22, WorldArt.Shape.Blob);
             sr.sortingOrder = 6;
             var follow = go.AddComponent<PatoyoFollower>();
             follow.target = lead;
-
-            var label = new GameObject("Name");
-            label.transform.SetParent(go.transform, false);
-            label.transform.localPosition = new Vector3(0f, 0.55f, 0f);
-            var tm = label.AddComponent<TextMesh>();
-            tm.text = "ปาโต้เยา";
-            tm.characterSize = 0.12f;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.fontSize = 22;
-            tm.color = new Color(1f, 0.85f, 0.9f);
+            WorldArt.MakeLabel(go.transform, "ปาโต้เยา", new Vector3(0f, 0.58f, 0f),
+                new Color(1f, 0.86f, 0.92f), 0.12f, 22);
             return go;
         }
 

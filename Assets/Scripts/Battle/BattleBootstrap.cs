@@ -51,6 +51,7 @@ namespace TsOnline
             }
 
             ApplyCamera();
+            BattleWorldView.BuildArena();
             PartyManager.Ensure();
             _turns = gameObject.AddComponent<TurnManager>();
             _ui = gameObject.AddComponent<BattleUI>();

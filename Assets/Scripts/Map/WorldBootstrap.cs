@@ -26,6 +26,7 @@ namespace TsOnline
             SaveService.HydrateIfNeeded();
             ApplyCamera();
             BuildGround();
+            BuildDecor();
             BuildLabels();
             GameObject player = BuildPlayer();
             PatoyoFollower.Spawn(player.transform);
@@ -91,41 +92,38 @@ namespace TsOnline
             PartyMember lead = PartyManager.Ensure().Party.Count > 0 ? PartyManager.Ensure().Party[0] : null;
             Color body = lead != null ? CreatedHero.ColorOf(lead.Element) : new Color(0.95f, 0.82f, 0.28f);
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = MakeQuad(body, 16);
+            sr.sprite = WorldArt.MakeShape(body, 24, WorldArt.Shape.Diamond);
             sr.sortingOrder = 5;
             var rb = go.AddComponent<Rigidbody2D>();
             rb.gravityScale = 0f;
             var col = go.AddComponent<CircleCollider2D>();
             col.radius = 0.38f;
             go.AddComponent<PlayerWorldController>();
-            var label = new GameObject("Name");
-            label.transform.SetParent(go.transform, false);
-            label.transform.localPosition = new Vector3(0f, 0.7f, 0f);
-            var tm = label.AddComponent<TextMesh>();
-            tm.text = lead != null && !string.IsNullOrEmpty(lead.ShortName) ? lead.ShortName : "จูล่ง";
-            tm.characterSize = 0.16f;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.fontSize = 24;
-            tm.color = Color.white;
+            string name = lead != null && !string.IsNullOrEmpty(lead.ShortName) ? lead.ShortName : "จูล่ง";
+            string el = lead != null ? CreatedHero.Thai(lead.Element) : "";
+            WorldArt.MakeLabel(go.transform, name, new Vector3(0f, 0.78f, 0f), Color.white, 0.15f, 26);
+            if (!string.IsNullOrEmpty(el))
+                WorldArt.MakeLabel(go.transform, "หัวหน้า · " + el, new Vector3(0f, 0.54f, 0f),
+                    Color.Lerp(body, Color.white, 0.4f), 0.11f, 22);
             return go;
         }
 
         void BuildForestEncounters()
         {
-            SpawnWanderer("Wolf", new Vector3(4.4f, 1.6f, 0f), new Color(0.40f, 0.82f, 0.55f),
-                new[] { forestWolf, forestWolf });
-            SpawnWanderer("Bandit", new Vector3(6.2f, -0.4f, 0f), new Color(0.86f, 0.24f, 0.18f),
-                new[] { mountainBandit, swampFrog });
-            SpawnWanderer("Frog", new Vector3(5.0f, -2.0f, 0f), new Color(0.22f, 0.52f, 0.82f),
-                new[] { swampFrog, forestWolf, mountainBandit });
+            SpawnWanderer("Wolf", "หมาป่า", new Vector3(4.4f, 1.6f, 0f), new Color(0.34f, 0.86f, 0.48f),
+                WorldArt.Shape.Diamond, new[] { forestWolf, forestWolf });
+            SpawnWanderer("Bandit", "โจร", new Vector3(6.2f, -0.4f, 0f), new Color(0.92f, 0.28f, 0.18f),
+                WorldArt.Shape.Square, new[] { mountainBandit, swampFrog });
+            SpawnWanderer("Frog", "กบ", new Vector3(5.0f, -2.0f, 0f), new Color(0.18f, 0.58f, 0.92f),
+                WorldArt.Shape.Circle, new[] { swampFrog, forestWolf, mountainBandit });
         }
 
-        void SpawnWanderer(string id, Vector3 pos, Color color, UnitDefinition[] pack)
+        void SpawnWanderer(string id, string thai, Vector3 pos, Color color, WorldArt.Shape shape, UnitDefinition[] pack)
         {
             var go = new GameObject("Encounter_" + id);
             go.transform.position = pos;
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = MakeQuad(color, 14);
+            sr.sprite = WorldArt.MakeShape(color, 20, shape);
             sr.sortingOrder = 4;
             var col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
@@ -136,53 +134,74 @@ namespace TsOnline
             var wander = go.AddComponent<WanderingMonster>();
             wander.range = 0.85f;
             wander.speed = 0.9f;
+            WorldArt.MakeLabel(go.transform, thai, new Vector3(0f, 0.62f, 0f), Color.Lerp(color, Color.white, 0.45f), 0.12f, 22);
         }
 
         void BuildGround()
         {
-            CreateQuad("CityGround", new Vector3(-5.5f, 0f, 1f), new Vector3(11f, 9f, 1f), new Color(0.22f, 0.24f, 0.28f), 0);
-            CreateQuad("ForestGround", new Vector3(5.2f, 0f, 1f), new Vector3(11f, 9f, 1f), new Color(0.14f, 0.28f, 0.16f), 0);
-            CreateQuad("Road", new Vector3(-0.2f, 0f, 1f), new Vector3(2.2f, 2.4f, 1f), new Color(0.32f, 0.30f, 0.22f), 1);
+            CreateGround("CityGround", new Vector3(-5.5f, 0f, 1f), new Vector3(11f, 9f, 1f), true, 0);
+            CreateGround("ForestGround", new Vector3(5.2f, 0f, 1f), new Vector3(11f, 9f, 1f), false, 0);
+            var road = new GameObject("Road");
+            road.transform.position = new Vector3(-0.2f, 0f, 1f);
+            road.transform.localScale = new Vector3(2.4f, 2.6f, 1f);
+            var roadSr = road.AddComponent<SpriteRenderer>();
+            roadSr.sprite = WorldArt.MakeQuad(new Color(0.58f, 0.44f, 0.28f), 16);
+            roadSr.sortingOrder = 1;
+        }
+
+        void BuildDecor()
+        {
+            PlaceDecor("HouseA", new Vector3(-8.4f, 2.8f, 0f), new Vector3(1.5f, 1.7f, 1f),
+                new Color(0.52f, 0.36f, 0.30f), WorldArt.Shape.Square, 2);
+            PlaceDecor("HouseB", new Vector3(-8.6f, -2.2f, 0f), new Vector3(1.3f, 1.5f, 1f),
+                new Color(0.40f, 0.38f, 0.44f), WorldArt.Shape.Square, 2);
+            PlaceDecor("Well", new Vector3(-4.0f, 2.2f, 0f), new Vector3(0.7f, 0.7f, 1f),
+                new Color(0.42f, 0.46f, 0.52f), WorldArt.Shape.Circle, 2);
+            PlaceDecor("TreeA", new Vector3(8.6f, 2.9f, 0f), new Vector3(1.3f, 1.6f, 1f),
+                new Color(0.08f, 0.28f, 0.10f), WorldArt.Shape.Triangle, 2);
+            PlaceDecor("TreeB", new Vector3(8.8f, -2.6f, 0f), new Vector3(1.2f, 1.5f, 1f),
+                new Color(0.10f, 0.32f, 0.12f), WorldArt.Shape.Triangle, 2);
+            PlaceDecor("TreeC", new Vector3(3.4f, 3.1f, 0f), new Vector3(1.0f, 1.3f, 1f),
+                new Color(0.07f, 0.24f, 0.10f), WorldArt.Shape.Triangle, 2);
         }
 
         void BuildLabels()
         {
-            WorldLabel("เมือง (ปลอดภัย)", new Vector3(-5.6f, 3.6f, 0f));
-            WorldLabel("ป่า (สุ่มสู้)", new Vector3(5.0f, 3.6f, 0f));
+            PlaceZoneChip("เมือง (ปลอดภัย)", new Vector3(-5.6f, 3.7f, 0f), new Color(0.55f, 0.50f, 0.40f));
+            PlaceZoneChip("ป่า (สุ่มสู้)", new Vector3(5.0f, 3.7f, 0f), new Color(0.18f, 0.40f, 0.20f));
         }
 
-        static void WorldLabel(string text, Vector3 pos)
+        static void PlaceZoneChip(string text, Vector3 pos, Color chip)
         {
             var go = new GameObject(text);
             go.transform.position = pos;
-            var tm = go.AddComponent<TextMesh>();
-            tm.text = text;
-            tm.characterSize = 0.22f;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.fontSize = 28;
-            tm.color = Color.white;
+            var chipGo = new GameObject("Chip");
+            chipGo.transform.SetParent(go.transform, false);
+            chipGo.transform.localScale = new Vector3(3.6f, 0.58f, 1f);
+            var sr = chipGo.AddComponent<SpriteRenderer>();
+            sr.sprite = WorldArt.MakeQuad(new Color(chip.r, chip.g, chip.b, 0.92f), 12);
+            sr.sortingOrder = 3;
+            WorldArt.MakeLabel(go.transform, text, Vector3.zero, Color.white, 0.16f, 28);
         }
 
-        static void CreateQuad(string name, Vector3 pos, Vector3 scale, Color color, int sort)
+        static void PlaceDecor(string name, Vector3 pos, Vector3 scale, Color color, WorldArt.Shape shape, int sort)
         {
             var go = new GameObject(name);
             go.transform.position = pos;
             go.transform.localScale = scale;
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sprite = MakeQuad(color, 8);
+            sr.sprite = WorldArt.MakeShape(color, 16, shape, false);
             sr.sortingOrder = sort;
         }
 
-        static Sprite MakeQuad(Color color, int size)
+        static void CreateGround(string name, Vector3 pos, Vector3 scale, bool city, int sort)
         {
-            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
-            tex.filterMode = FilterMode.Point;
-            var pixels = new Color[size * size];
-            for (int i = 0; i < pixels.Length; i++)
-                pixels[i] = color;
-            tex.SetPixels(pixels);
-            tex.Apply();
-            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+            var go = new GameObject(name);
+            go.transform.position = pos;
+            go.transform.localScale = scale;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = WorldArt.MakeGround(city);
+            sr.sortingOrder = sort;
         }
 
         static void ApplyCamera()
@@ -192,7 +211,7 @@ namespace TsOnline
                 return;
             cam.orthographic = true;
             cam.orthographicSize = 5.4f;
-            cam.backgroundColor = new Color(0.08f, 0.10f, 0.11f);
+            cam.backgroundColor = new Color(0.07f, 0.10f, 0.08f);
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.transform.position = new Vector3(-4f, 0f, -10f);
         }
